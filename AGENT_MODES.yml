@@ -1,5 +1,5 @@
 none: ""
-just-answer: no tool calls, just answer
+answer: no tool calls, just answer
 targeted-edits: >-
   do the targeted edit calls to execute this task. u may use the write tool if u need a new file,
   or the read tool if an edit fails on needed a new read, or bash to commit at the end. then halt.

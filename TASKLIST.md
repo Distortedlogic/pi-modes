@@ -3,18 +3,18 @@
 ## Work Unit 1: Rename the Current Extension to `pi-modes`
 
 - [ ] In `package.json`, set the package name to `pi-modes`, version to `0.3.0`, description to `A Pi extension that loads and cycles package and project modes from YAML.`, and repository URL to `git+https://github.com/Distortedlogic/pi-modes.git`.
-- [ ] In `index.ts`, change the widget key from `just-answer-mode` to `pi-modes`.
+- [ ] In `index.ts`, set the widget key to `pi-modes`.
 - [ ] Update `README.md` so its name, repository links, install commands, and examples use `pi-modes`.
 - [ ] Update `skills/add-pi-mode/SKILL.md` so its package references and instructions use `pi-modes`.
 
 ## Work Unit 2: Release the Renamed `pi-modes` Package
 
-- [ ] Run `rg 'pi-just-answer|just-answer'` on tracked files, remove each obsolete package identifier, and run `git diff --check`.
+- [ ] Search tracked files for obsolete package identifiers, remove each obsolete identifier, and run `git diff --check`.
 - [ ] Load `index.ts` as a local Pi extension and test package mode loading, trusted project mode loading, Shift+Tab wraparound, widget output, and exact one-time suffix insertion.
 - [ ] Commit the rename with the message `Rename to pi-modes`.
-- [ ] Rename the GitHub repository from `Distortedlogic/pi-just-answer` to `Distortedlogic/pi-modes`.
+- [ ] Rename the current GitHub repository to `Distortedlogic/pi-modes`.
 - [ ] Set `origin` to the renamed GitHub repository and push the rename commit.
-- [ ] Remove the global `git:github.com/Distortedlogic/pi-just-answer` package and install global `git:github.com/Distortedlogic/pi-modes`.
+- [ ] Remove the superseded global package and install global `git:github.com/Distortedlogic/pi-modes`.
 - [ ] Reload Pi and test that one `pi-modes` extension loads with the existing mode behavior.
 - [ ] After this Pi session exits, rename the local repository directory to `pi-modes` under its current parent directory.
 
@@ -70,4 +70,4 @@
 - [ ] Create the private GitHub repository `Distortedlogic/pi-prompts`.
 - [ ] Commit `pi-prompts` with the message `Add prompt cycling` and push the default branch.
 - [ ] Install global `git:github.com/Distortedlogic/pi-prompts` and reload Pi.
-- [ ] Run `pi list` and verify that `pi-modes` and `pi-prompts` each occur once and `pi-just-answer` does not occur.
+- [ ] Run `pi list` and verify that `pi-modes` and `pi-prompts` each occur once and no superseded package occurs.
