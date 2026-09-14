@@ -1,9 +1,9 @@
 ---
 name: add-pi-mode
-description: Use when the user asks to add a mode to the pi mode extension globally, for a project, or for a Pi package.
+description: Use when the user asks to add a mode to the pi-modes extension globally, for a project, or for a Pi package.
 ---
 
-# Add a pi mode
+# Add a mode to pi-modes
 
 1. Use the requested scope. If the scope is not clear, ask which scope:
    - Global: the package-owned `AGENT_MODES.yml` in `pi-modes`, declared in its `package.json` under `pi.modes`
