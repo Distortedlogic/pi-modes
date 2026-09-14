@@ -24,26 +24,26 @@
 
 ## Work Unit 2: Define Package Discovery Locations
 
-- [ ] Determine the Pi agent directory with this priority:
+- [x] Determine the Pi agent directory with this priority:
   1. `PI_CODING_AGENT_DIR` when it is set.
   2. `join(homedir(), CONFIG_DIR_NAME, "agent")` otherwise.
-- [ ] Build the global scan roots:
+- [x] Build the global scan roots:
   - `<agentDir>/npm/node_modules`
   - `<agentDir>/git`
   - `<agentDir>/extensions`
-- [ ] Build the project scan roots without a trust check:
+- [x] Build the project scan roots without a trust check:
   - `<cwd>/<CONFIG_DIR_NAME>/npm/node_modules`
   - `<cwd>/<CONFIG_DIR_NAME>/git`
   - `<cwd>/<CONFIG_DIR_NAME>/extensions`
-- [ ] Add `<cwd>/package.json` as a direct package manifest candidate.
-- [ ] Keep global roots before project roots so project package modes load later.
-- [ ] Ignore scan roots that do not exist.
+- [x] Add `<cwd>/package.json` as a direct package manifest candidate.
+- [x] Keep global roots before project roots so project package modes load later.
+- [x] Ignore scan roots that do not exist.
 
 ### Completion criteria
 
-- [ ] Package discovery does not read Pi settings.
-- [ ] Package discovery does not call `ctx.isProjectTrusted()`.
-- [ ] Package discovery does not install, update, enable, or disable packages.
+- [x] Package discovery does not read Pi settings.
+- [x] Package discovery does not call `ctx.isProjectTrusted()`.
+- [x] Package discovery does not install, update, enable, or disable packages.
 
 ## Work Unit 3: Discover Package Manifests
 

@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
@@ -23,6 +24,22 @@ export default function (pi: ExtensionAPI) {
 	pi.on("session_start", async (_event, ctx) => {
 		removeTerminalInputListener?.();
 		removeTerminalInputListener = undefined;
+
+		const agentDir = process.env.PI_CODING_AGENT_DIR ?? join(homedir(), CONFIG_DIR_NAME, "agent");
+		const globalPackageRoots = [
+			{ path: join(agentDir, "npm", "node_modules"), type: "npm" },
+			{ path: join(agentDir, "git"), type: "git" },
+			{ path: join(agentDir, "extensions"), type: "extensions" },
+		];
+		const projectPackageDir = join(ctx.cwd, CONFIG_DIR_NAME);
+		const projectPackageRoots = [
+			{ path: join(projectPackageDir, "npm", "node_modules"), type: "npm" },
+			{ path: join(projectPackageDir, "git"), type: "git" },
+			{ path: join(projectPackageDir, "extensions"), type: "extensions" },
+		];
+		const packageScanRoots = [...globalPackageRoots, ...projectPackageRoots].filter(({ path }) => existsSync(path));
+		const projectManifestPath = join(ctx.cwd, "package.json");
+		const packageManifestPaths = existsSync(projectManifestPath) ? [projectManifestPath] : [];
 
 		const paths = [{ path: join(homedir(), CONFIG_DIR_NAME, MODES_FILE), optional: true }];
 		if (ctx.isProjectTrusted()) {
