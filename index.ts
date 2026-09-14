@@ -1,7 +1,7 @@
-import { existsSync } from "node:fs";
+import { existsSync, globSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { join, normalize } from "node:path";
 import { CONFIG_DIR_NAME, type ExtensionAPI, type ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { isKeyRelease, isKeyRepeat, matchesKey } from "@earendil-works/pi-tui";
 import { parse } from "yaml";
@@ -38,8 +38,25 @@ export default function (pi: ExtensionAPI) {
 			{ path: join(projectPackageDir, "extensions"), type: "extensions" },
 		];
 		const packageScanRoots = [...globalPackageRoots, ...projectPackageRoots].filter(({ path }) => existsSync(path));
+		const packageManifestCandidates: string[] = [];
+		for (const root of packageScanRoots) {
+			const matches =
+				root.type === "npm"
+					? [
+							...globSync("*/package.json", { cwd: root.path }),
+							...globSync("@*/*/package.json", { cwd: root.path }),
+						]
+					: globSync("**/package.json", {
+							cwd: root.path,
+							exclude: ["**/node_modules/**", "**/.git/**"],
+						});
+			for (const match of matches.sort()) {
+				packageManifestCandidates.push(normalize(join(root.path, match)));
+			}
+		}
 		const projectManifestPath = join(ctx.cwd, "package.json");
-		const packageManifestPaths = existsSync(projectManifestPath) ? [projectManifestPath] : [];
+		if (existsSync(projectManifestPath)) packageManifestCandidates.push(normalize(projectManifestPath));
+		const packageManifestPaths = [...new Set(packageManifestCandidates)];
 
 		const paths = [{ path: join(homedir(), CONFIG_DIR_NAME, MODES_FILE), optional: true }];
 		if (ctx.isProjectTrusted()) {

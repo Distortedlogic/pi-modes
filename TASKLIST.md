@@ -47,26 +47,26 @@
 
 ## Work Unit 3: Discover Package Manifests
 
-- [ ] Import and use Node's native `globSync()` implementation.
-- [ ] Under each npm root, find:
+- [x] Import and use Node's native `globSync()` implementation.
+- [x] Under each npm root, find:
   - `*/package.json`
   - `@*/*/package.json`
-- [ ] Under each Git root, find `**/package.json`.
-- [ ] Under each extension root, find `**/package.json`.
-- [ ] Exclude `**/node_modules/**` from recursive Git and extension scans.
-- [ ] Exclude `**/.git/**` from recursive Git and extension scans.
-- [ ] Sort matches from each scan lexically.
-- [ ] Normalize each manifest path.
-- [ ] Deduplicate manifest paths while preserving the first occurrence.
-- [ ] Do not scan other home, project, or system directories.
+- [x] Under each Git root, find `**/package.json`.
+- [x] Under each extension root, find `**/package.json`.
+- [x] Exclude `**/node_modules/**` from recursive Git and extension scans.
+- [x] Exclude `**/.git/**` from recursive Git and extension scans.
+- [x] Sort matches from each scan lexically.
+- [x] Normalize each manifest path.
+- [x] Deduplicate manifest paths while preserving the first occurrence.
+- [x] Do not scan other home, project, or system directories.
 
 ### Completion criteria
 
-- [ ] Unscoped npm packages are found.
-- [ ] Scoped npm packages are found.
-- [ ] Git-installed packages are found without scanning their dependencies.
-- [ ] Extension-directory packages are found without scanning their dependencies.
-- [ ] The current project package manifest is considered once.
+- [x] Unscoped npm packages are found.
+- [x] Scoped npm packages are found.
+- [x] Git-installed packages are found without scanning their dependencies.
+- [x] Extension-directory packages are found without scanning their dependencies.
+- [x] The current project package manifest is considered once.
 
 ## Work Unit 4: Read `pi.modes` Declarations
 
