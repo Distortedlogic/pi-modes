@@ -143,23 +143,23 @@
 
 ## Work Unit 7: Preserve Existing Runtime Behavior
 
-- [ ] Keep `["exec", ""]` as the fallback when no valid mode is loaded.
-- [ ] Do not add `exec` when configured modes exist and do not define it.
-- [ ] Reset `modeIndex` to zero during each `session_start`.
-- [ ] Keep the existing widget key and placement.
-- [ ] Keep `Shift+Tab` mode cycling.
-- [ ] Keep key-repeat and key-release consumption.
-- [ ] Keep terminal input listener cleanup before reinitialization.
-- [ ] Keep terminal input listener cleanup during `session_shutdown`.
-- [ ] Keep the existing separator text.
-- [ ] Keep duplicate-suffix prevention.
-- [ ] Keep extension-source input exclusion.
-- [ ] Keep image forwarding in transformed input.
+- [x] Keep `["exec", ""]` as the fallback when no valid mode is loaded.
+- [x] Do not add `exec` when configured modes exist and do not define it.
+- [x] Reset `modeIndex` to zero during each `session_start`.
+- [x] Keep the existing widget key and placement.
+- [x] Keep `Shift+Tab` mode cycling.
+- [x] Keep key-repeat and key-release consumption.
+- [x] Keep terminal input listener cleanup before reinitialization.
+- [x] Keep terminal input listener cleanup during `session_shutdown`.
+- [x] Keep the existing separator text.
+- [x] Keep duplicate-suffix prevention.
+- [x] Keep extension-source input exclusion.
+- [x] Keep image forwarding in transformed input.
 
 ### Completion criteria
 
-- [ ] Package discovery changes only the set of available modes.
-- [ ] Existing global and project mode behavior remains unchanged.
+- [x] Package discovery changes only the set of available modes.
+- [x] Existing global and project mode behavior remains unchanged.
 
 ## Work Unit 8: Update Package Documentation
 
