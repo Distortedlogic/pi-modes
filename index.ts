@@ -8,7 +8,7 @@ import { parse } from "yaml";
 
 const MODES_FILE = "AGENT_MODES.yml";
 const SEPARATOR = " --- ";
-const WIDGET_KEY = "just-answer-mode";
+const WIDGET_KEY = "pi-modes";
 
 async function loadModeFile(
 	path: string,
