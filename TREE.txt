@@ -1,0 +1,13 @@
+/tmp/pi-context-preload-tree-yiJ4p4/paths.txt
+├── docs
+│   └── global-skills
+│       └── add-pi-mode
+│           └── SKILL.md
+├── .pi
+│   └── readcache
+│       ├── objects
+│       └── tmp
+├── .gitignore
+├── index.ts
+├── package.json
+└── README.md
