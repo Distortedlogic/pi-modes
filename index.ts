@@ -39,6 +39,7 @@ async function loadModeFile(
 export default function (pi: ExtensionAPI) {
 	let modes: [string, string][] = [["exec", ""]];
 	let modeIndex = 0;
+	let activeContext: ExtensionContext | undefined;
 	let removeTerminalInputListener: (() => void) | undefined;
 
 	const showMode = (ctx: ExtensionContext): void => {
@@ -47,7 +48,15 @@ export default function (pi: ExtensionAPI) {
 		ctx.ui.setWidget(WIDGET_KEY, content, { placement: "belowEditor" });
 	};
 
+	pi.events.on("pi-modes:set", (event: { name: string }) => {
+		const nextModeIndex = modes.findIndex(([name]) => name === event.name);
+		if (nextModeIndex === -1 || !activeContext) return;
+		modeIndex = nextModeIndex;
+		showMode(activeContext);
+	});
+
 	pi.on("session_start", async (_event, ctx) => {
+		activeContext = ctx;
 		removeTerminalInputListener?.();
 		removeTerminalInputListener = undefined;
 
@@ -156,6 +165,7 @@ export default function (pi: ExtensionAPI) {
 	});
 
 	pi.on("session_shutdown", (_event, ctx) => {
+		activeContext = undefined;
 		removeTerminalInputListener?.();
 		removeTerminalInputListener = undefined;
 		ctx.ui.setWidget(WIDGET_KEY, undefined);
@@ -164,7 +174,7 @@ export default function (pi: ExtensionAPI) {
 	pi.on("input", (event) => {
 		const [, text] = modes[modeIndex];
 		const suffix = text === "" ? "" : `${SEPARATOR}${text}`;
-		if (!suffix || event.source === "extension" || event.text.endsWith(suffix)) {
+		if (!suffix || event.text.endsWith(suffix)) {
 			return { action: "continue" };
 		}
 

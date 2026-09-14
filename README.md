@@ -49,6 +49,16 @@ You can also put project modes in `<cwd>/.pi/AGENT_MODES.yml`.
 
 The project file is optional. The extension loads it only when Pi trusts the project.
 
+## Select a mode from an extension
+
+Another extension can select a configured mode through the shared event bus:
+
+```ts
+pi.events.emit("pi-modes:set", { name: "brief" });
+```
+
+The `pi-modes:set` event accepts `{ name: string }`. The name must match a configured mode name exactly. An unknown name does not change the current mode. In TUI mode, the widget changes immediately.
+
 ## Package scan locations
 
 The Pi agent directory is `PI_CODING_AGENT_DIR` when that variable is set. Otherwise, it is `~/.pi/agent`.
