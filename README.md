@@ -1,6 +1,6 @@
 # pi-just-answer
 
-`pi-just-answer` is a Pi extension that loads named prompt modes from Pi packages and from global or project YAML files. In TUI mode, press `Shift+Tab` to select the next mode. When you submit input, the extension appends ` --- <mode text>` once.
+`pi-just-answer` is a Pi extension that loads named prompt modes from Pi packages and from an optional project YAML file. In TUI mode, press `Shift+Tab` to select the next mode. When you submit input, the extension appends ` --- <mode text>` once.
 
 ## Install
 
@@ -43,14 +43,11 @@ A package can declare one or more mode files in `package.json` under `pi.modes`:
 
 Each entry must be an exact relative path from the directory that contains `package.json`. The path must end in `.yml` or `.yaml`. Do not use a glob, directory, `!`, `+`, or `-` as a filter marker. Each declared file is required.
 
-### Global and project modes
+### Project modes
 
-You can also put modes in these files:
+You can also put project modes in `<cwd>/.pi/AGENT_MODES.yml`.
 
-- Global: `~/.pi/AGENT_MODES.yml`
-- Project: `<cwd>/.pi/AGENT_MODES.yml`
-
-The global and project files are optional. The extension loads the project file only when Pi trusts the project.
+The project file is optional. The extension loads it only when Pi trusts the project.
 
 ## Package scan locations
 
@@ -79,8 +76,7 @@ The extension loads mode sources in this order:
 
 1. Package mode files from global scan locations.
 2. Package mode files from project scan locations, including `<cwd>/package.json`.
-3. `~/.pi/AGENT_MODES.yml`.
-4. `<cwd>/.pi/AGENT_MODES.yml`, when Pi trusts the project.
+3. `<cwd>/.pi/AGENT_MODES.yml`, when Pi trusts the project.
 
 A later value replaces an earlier value with the same mode name. The mode stays in one cycle position.
 
@@ -88,6 +84,6 @@ A later value replaces an earlier value with the same mode name. The mode stays 
 
 The extension ignores malformed package manifests and packages without `pi.modes`. An invalid `pi.modes` declaration reports one error, and processing continues with later packages.
 
-A missing declared mode file, malformed YAML, or invalid mode entry reports an error. The extension continues with later files. It validates a complete YAML file before it adds any mode from that file. A missing optional global or project mode file does not report an error.
+A missing declared mode file, malformed YAML, or invalid mode entry reports an error. The extension continues with later files. It validates a complete YAML file before it adds any mode from that file. A missing optional project mode file does not report an error.
 
 Run `/reload` after you change a package manifest or mode file.

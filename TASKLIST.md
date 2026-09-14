@@ -6,7 +6,7 @@
 - [ ] Do not change the Pi source repository.
 - [ ] Load package mode files from `package.json` entries under `pi.modes`.
 - [ ] Keep package discovery independent from Pi trust and package filtering.
-- [ ] Preserve all existing global, project, TUI, and input behavior.
+- [ ] Preserve all existing project, TUI, and input behavior.
 - [ ] Do not add package installation, update, settings parsing, event registration, file watching, or inline package modes.
 
 ## Work Unit 1: Remove the Invalid Pi Integration
@@ -119,14 +119,13 @@
 
 ### Completion criteria
 
-- [x] Package, global, and project mode files use the same parser and validation rules.
+- [x] Package and project mode files use the same parser and validation rules.
 - [x] An invalid entry cannot cause a partial file load.
 
 ## Work Unit 6: Apply Source Order and Overrides
 
 - [x] Load package mode files from global scan roots first.
 - [x] Load package mode files from project scan roots second.
-- [x] Load `~/.pi/AGENT_MODES.yml` third.
 - [x] Load `<cwd>/<CONFIG_DIR_NAME>/AGENT_MODES.yml` last when the existing project trust check permits it.
 - [x] Mark package-declared files as required.
 - [x] Mark the existing global and project files as optional.
@@ -137,7 +136,6 @@
 ### Completion criteria
 
 - [x] Project package modes replace global package modes with the same name.
-- [x] The explicit global mode file replaces package modes with the same name.
 - [x] The explicit project mode file has the highest priority.
 - [x] Duplicate replacement does not add a second cycle entry.
 
@@ -159,7 +157,7 @@
 ### Completion criteria
 
 - [x] Package discovery changes only the set of available modes.
-- [x] Existing global and project mode behavior remains unchanged.
+- [x] Existing project mode behavior remains unchanged.
 
 ## Work Unit 8: Update Package Documentation
 
@@ -167,7 +165,7 @@
 - [x] Add a `pi.modes` package manifest example.
 - [x] State that each `pi.modes` entry is an exact relative YAML file path.
 - [x] List all package scan locations.
-- [x] Document package, global, and project source priority.
+- [x] Document global package, project package, and project-file source priority.
 - [x] State that package discovery does not use Pi trust or package filters.
 - [x] Document error behavior.
 - [x] Tell users to run `/reload` after a manifest or mode file change.
@@ -188,7 +186,7 @@
 - [x] Verify a current project package mode.
 - [x] Verify more than one mode file in one package.
 - [x] Verify duplicate mode replacement across global and project package roots.
-- [x] Verify global `AGENT_MODES.yml` overrides a package mode.
+- [x] Verify package-owned `AGENT_MODES.yml` loads from the globally installed extension.
 - [x] Verify project `AGENT_MODES.yml` overrides all earlier sources.
 - [x] Verify malformed `package.json` does not stop startup.
 - [x] Verify invalid `pi.modes` reports an error and does not stop other packages.

@@ -129,10 +129,7 @@ export default function (pi: ExtensionAPI) {
 		}
 		const packageModePaths = [...new Set(packageModeCandidates)];
 
-		const paths = [
-			...packageModePaths.map((path) => ({ path, optional: false })),
-			{ path: join(homedir(), CONFIG_DIR_NAME, MODES_FILE), optional: true },
-		];
+		const paths = packageModePaths.map((path) => ({ path, optional: false }));
 		if (ctx.isProjectTrusted()) {
 			paths.push({ path: join(ctx.cwd, CONFIG_DIR_NAME, MODES_FILE), optional: true });
 		}
