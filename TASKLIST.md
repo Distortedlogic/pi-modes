@@ -201,11 +201,11 @@
 
 ## Work Unit 10: Final Review and Commit
 
-- [ ] Confirm that no file outside `pi-just-answer` changed.
-- [ ] Confirm that no Pi source file changed.
-- [ ] Confirm that no dependency was added.
-- [ ] Confirm that package discovery contains no trust check.
-- [ ] Confirm that package discovery contains no settings parser or package manager implementation.
-- [ ] Confirm that the implementation follows the fixed scan locations and exact-path contract.
-- [ ] Review the final diff for unrelated edits.
-- [ ] Commit the completed implementation with a minimal, accurate message.
+- [x] Confirm that no file outside `pi-just-answer` changed.
+- [x] Confirm that no Pi source file changed.
+- [x] Confirm that no dependency was added.
+- [x] Confirm that package discovery contains no trust check.
+- [x] Confirm that package discovery contains no settings parser or package manager implementation.
+- [x] Confirm that the implementation follows the fixed scan locations and exact-path contract.
+- [x] Review the final diff for unrelated edits.
+- [x] Commit the completed implementation with a minimal, accurate message.
