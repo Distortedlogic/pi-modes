@@ -177,27 +177,27 @@
 
 ## Work Unit 9: Validate the Implementation
 
-- [ ] Do not create a new test suite because this repository does not have one.
-- [ ] Run the available TypeScript or package validation command if the repository provides one.
-- [ ] Run `git diff --check`.
-- [ ] Start Pi with the local extension.
-- [ ] Verify an unscoped npm package mode.
-- [ ] Verify a scoped npm package mode.
-- [ ] Verify a Git package mode.
-- [ ] Verify an extension-directory package mode.
-- [ ] Verify a current project package mode.
-- [ ] Verify more than one mode file in one package.
-- [ ] Verify duplicate mode replacement across global and project package roots.
-- [ ] Verify global `AGENT_MODES.yml` overrides a package mode.
-- [ ] Verify project `AGENT_MODES.yml` overrides all earlier sources.
-- [ ] Verify malformed `package.json` does not stop startup.
-- [ ] Verify invalid `pi.modes` reports an error and does not stop other packages.
-- [ ] Verify a missing declared mode file reports an error.
-- [ ] Verify malformed YAML reports an error.
-- [ ] Verify the `exec` fallback when no valid mode exists.
-- [ ] Verify `/reload` finds manifest and YAML changes.
-- [ ] Verify `Shift+Tab` cycles through the final mode order.
-- [ ] Verify submitted input receives the selected suffix exactly once.
+- [x] Do not create a new test suite because this repository does not have one.
+- [x] Run the available TypeScript or package validation command if the repository provides one.
+- [x] Run `git diff --check`.
+- [x] Start Pi with the local extension.
+- [x] Verify an unscoped npm package mode.
+- [x] Verify a scoped npm package mode.
+- [x] Verify a Git package mode.
+- [x] Verify an extension-directory package mode.
+- [x] Verify a current project package mode.
+- [x] Verify more than one mode file in one package.
+- [x] Verify duplicate mode replacement across global and project package roots.
+- [x] Verify global `AGENT_MODES.yml` overrides a package mode.
+- [x] Verify project `AGENT_MODES.yml` overrides all earlier sources.
+- [x] Verify malformed `package.json` does not stop startup.
+- [x] Verify invalid `pi.modes` reports an error and does not stop other packages.
+- [x] Verify a missing declared mode file reports an error.
+- [x] Verify malformed YAML reports an error.
+- [x] Verify the `exec` fallback when no valid mode exists.
+- [x] Verify `/reload` finds manifest and YAML changes.
+- [x] Verify `Shift+Tab` cycles through the final mode order.
+- [x] Verify submitted input receives the selected suffix exactly once.
 
 ## Work Unit 10: Final Review and Commit
 
