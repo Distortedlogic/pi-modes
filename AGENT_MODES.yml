@@ -1,0 +1,10 @@
+none: ""
+just-answer: no tool calls, just answer
+targeted-edits: >-
+  do the targeted edit calls to execute this task. u may use the write tool if u need a new file,
+  or the read tool if an edit fails on needed a new read, or bash to commit at the end. then halt.
+create-tasklist: >-
+  now group this into work units and give me a technical impl plan for this in the format of a properly ordered task list,
+  n dump the task list into a TASKLIST.md in cwd
+no-lazy: >-
+  stop giving me low effort responses. u have all the context needed n it should be clear what i am asking for such that if u put in the effort that u will generate a good response. --- no tool calls, just answer.
