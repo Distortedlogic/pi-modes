@@ -20,7 +20,7 @@
 
 ## Work Unit 3: Create the `pi-prompts` Package
 
-- [ ] Create `~/repos/pi-prompts` from the complete Pi extension authoring template.
+- [ ] Create `~/pi-extensions/pi-prompts` from the complete Pi extension authoring template.
 - [ ] Replace the template placeholders with package name `pi-prompts` and description `A Pi extension that cycles native prompt templates into the editor.`.
 - [ ] Set `package.json` to version `0.1.0`, private package status, repository URL `git+https://github.com/Distortedlogic/pi-prompts.git`, and keyword `pi-package`.
 - [ ] Declare `./src/index.ts` under `pi.extensions` and `./prompts` under `pi.prompts`.
