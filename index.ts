@@ -10,6 +10,32 @@ const MODES_FILE = "AGENT_MODES.yml";
 const SEPARATOR = " --- ";
 const WIDGET_KEY = "just-answer-mode";
 
+async function loadModeFile(
+	path: string,
+	destination: Map<string, string>,
+	optional: boolean,
+	ctx: ExtensionContext,
+): Promise<void> {
+	try {
+		const document: unknown = parse(await readFile(path, "utf8"), { mapAsMap: true });
+		if (!(document instanceof Map)) throw new Error("Expected a map of mode names to text.");
+
+		const entries: [string, string][] = [];
+		for (const [name, text] of document) {
+			if (typeof name !== "string" || name.trim() === "" || typeof text !== "string") {
+				throw new Error('Each mode needs a non-empty string name and a string value. Use "" for no appended text.');
+			}
+			entries.push([name, text]);
+		}
+		for (const [name, text] of entries) destination.set(name, text);
+	} catch (error) {
+		if (optional && error instanceof Error && "code" in error && error.code === "ENOENT") return;
+		const message = `Cannot load modes from ${path}: ${error instanceof Error ? error.message : String(error)}`;
+		if (ctx.hasUI) ctx.ui.notify(message, "error");
+		else console.error(message);
+	}
+}
+
 export default function (pi: ExtensionAPI) {
 	let modes: [string, string][] = [["exec", ""]];
 	let modeIndex = 0;
@@ -103,32 +129,17 @@ export default function (pi: ExtensionAPI) {
 		}
 		const packageModePaths = [...new Set(packageModeCandidates)];
 
-		const paths = [{ path: join(homedir(), CONFIG_DIR_NAME, MODES_FILE), optional: true }];
+		const paths = [
+			...packageModePaths.map((path) => ({ path, optional: false })),
+			{ path: join(homedir(), CONFIG_DIR_NAME, MODES_FILE), optional: true },
+		];
 		if (ctx.isProjectTrusted()) {
 			paths.push({ path: join(ctx.cwd, CONFIG_DIR_NAME, MODES_FILE), optional: true });
 		}
 		const configured = new Map<string, string>();
 
 		for (const { path, optional } of paths) {
-			try {
-				const document: unknown = parse(await readFile(path, "utf8"), { mapAsMap: true });
-				if (document === null) continue;
-				if (!(document instanceof Map)) throw new Error("Expected a map of mode names to text.");
-
-				const entries: [string, string][] = [];
-				for (const [name, text] of document) {
-					if (typeof name !== "string" || name.trim() === "" || typeof text !== "string") {
-						throw new Error('Each mode needs a non-empty string name and a string value. Use "" for no appended text.');
-					}
-					entries.push([name, text]);
-				}
-				for (const [name, text] of entries) configured.set(name, text);
-			} catch (error) {
-				if (optional && error instanceof Error && "code" in error && error.code === "ENOENT") continue;
-				const message = `Cannot load modes from ${path}: ${error instanceof Error ? error.message : String(error)}`;
-				if (ctx.hasUI) ctx.ui.notify(message, "error");
-				else console.error(message);
-			}
+			await loadModeFile(path, configured, optional, ctx);
 		}
 
 		modes = configured.size > 0 ? [...configured] : [["exec", ""]];

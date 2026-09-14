@@ -101,26 +101,26 @@
 
 ## Work Unit 5: Reuse One YAML Mode Loader
 
-- [ ] Extract the current YAML read, parse, and validation logic into one local function.
-- [ ] Give the function these inputs:
+- [x] Extract the current YAML read, parse, and validation logic into one local function.
+- [x] Give the function these inputs:
   - mode file path;
   - destination `Map<string, string>`;
   - whether a missing file is optional;
   - extension context for error reporting.
-- [ ] Keep `parse(..., { mapAsMap: true })`.
-- [ ] Require the YAML document to be a map.
-- [ ] Require each mode name to be a non-empty string.
-- [ ] Require each mode value to be a string.
-- [ ] Keep an empty string as a valid mode value.
-- [ ] Validate the complete file before adding any entry to the destination map.
-- [ ] Skip only an optional missing file.
-- [ ] Report all other read, parse, and validation errors.
-- [ ] Continue with later files after an error.
+- [x] Keep `parse(..., { mapAsMap: true })`.
+- [x] Require the YAML document to be a map.
+- [x] Require each mode name to be a non-empty string.
+- [x] Require each mode value to be a string.
+- [x] Keep an empty string as a valid mode value.
+- [x] Validate the complete file before adding any entry to the destination map.
+- [x] Skip only an optional missing file.
+- [x] Report all other read, parse, and validation errors.
+- [x] Continue with later files after an error.
 
 ### Completion criteria
 
-- [ ] Package, global, and project mode files use the same parser and validation rules.
-- [ ] An invalid entry cannot cause a partial file load.
+- [x] Package, global, and project mode files use the same parser and validation rules.
+- [x] An invalid entry cannot cause a partial file load.
 
 ## Work Unit 6: Apply Source Order and Overrides
 
