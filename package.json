@@ -1,8 +1,8 @@
 {
-  "name": "pi-just-answer",
-  "version": "0.2.0",
+  "name": "pi-modes",
+  "version": "0.3.0",
   "private": true,
-  "description": "A pi extension that loads package and project prompt modes from YAML.",
+  "description": "A Pi extension that loads and cycles package and project modes from YAML.",
   "type": "module",
   "keywords": [
     "pi-package"
@@ -10,7 +10,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Distortedlogic/pi-just-answer.git"
+    "url": "git+https://github.com/Distortedlogic/pi-modes.git"
   },
   "pi": {
     "extensions": [
