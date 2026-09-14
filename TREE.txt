@@ -1,13 +1,52 @@
-/tmp/pi-context-preload-tree-yiJ4p4/paths.txt
-├── docs
-│   └── global-skills
-│       └── add-pi-mode
-│           └── SKILL.md
+/tmp/pi-context-preload-tree-CUNs4Z/paths.txt
 ├── .pi
 │   └── readcache
 │       ├── objects
+│       │   ├── sha256-0b3222bc4d3a26403ebdae6b465c4fb55aad79c43996bd81bee1ed413cab1434.txt
+│       │   ├── sha256-1877e9535820cb8b45e5a84598ac8ae581058bb0fbee6f0c64ec672f8ab986dd.txt
+│       │   ├── sha256-1e0126e1253d7a1b4cdd53eefa18ed1ecbecfe0742bb5ca56b5315babba01f11.txt
+│       │   ├── sha256-1e712a966e72a67f8282c51e6fed6d59abf1737d7aeed5721ecd9de134fc80b6.txt
+│       │   ├── sha256-21e5269ecf825f47a4b3bb3b66ca359195beb252ace89d6a5d782f12f521639c.txt
+│       │   ├── sha256-326937babdf310f0be0571c9c36048be95510cdff4b52955d05ba6848310f223.txt
+│       │   ├── sha256-3d035028d5b9d7e8a3d6fc1bfa74aa78a7c6b53dcd5ee8f4044cf74d73fbfbd8.txt
+│       │   ├── sha256-4877f1cc5285601fccc4dd0d2bc326f71972d4e6adeac61eef8bd7e9187d5de4.txt
+│       │   ├── sha256-4d56952b0fb13bf8f9b6c13a6d4c34a075bac3af447636a1df4335d7576e2f97.txt
+│       │   ├── sha256-4d7043fbae033b5398db34046feea2ac3e910079e8def6a1d198b7c840190fb0.txt
+│       │   ├── sha256-50e6461c3da019a05f85d50a7ca899a9b814ef8b95d497b8d0bdfa8397c2d6d8.txt
+│       │   ├── sha256-5318e01a9d780412a033f63a350abebdf64d1f236775ffc9e139f4ae559d526d.txt
+│       │   ├── sha256-5b7fa6bcba935f4bd002576591bd090088c4bd600b468d03db687fd4ac3eb5c4.txt
+│       │   ├── sha256-5bba04951b7ad7e785dbb92e6c24cf2e94678344f82e59a60b4c34b1ef91557e.txt
+│       │   ├── sha256-5f14112641be68c62f83ed5932ecfc4456570e0d792e543c6b37898a3e955ae1.txt
+│       │   ├── sha256-62ec3fe6e447f42682210a44c9bf77f8417e1d0869c31a95bfe36da931e4254e.txt
+│       │   ├── sha256-6553ec1f3dcc9081efa612ec36186faf6319ce0513d34b7d91799f1eab565b06.txt
+│       │   ├── sha256-6839a53be0ddf8533bc4a0b71fb9371b512a467d1c8a827787a02a33a3674b9e.txt
+│       │   ├── sha256-78188c18648aa24a8ff164f9d9e5d0f1e7dca254892375a23d478c5318434454.txt
+│       │   ├── sha256-8e06358a6954cddc494adfd5235bfd763da08b981830f94ea94ad184a55b412b.txt
+│       │   ├── sha256-8e1505d56da1c84924c43fa70c5180941c682b38c8132cbd744c0d4b31c5e35a.txt
+│       │   ├── sha256-918c262a787498940cc4b6c65c239e0ee7bd53b8143a49494b0791779a56623c.txt
+│       │   ├── sha256-962d3fb1b585bac171c3553bf09113033182d0b9a6ca2e8c01e3b778048a6850.txt
+│       │   ├── sha256-9773f8b8ecbf248224b1e3868fa88712af2901d8614eefc27504b40ff7741c1c.txt
+│       │   ├── sha256-a1ad146584d1bddfd6b6304423609fe5c2a376a10ed7131843aed3558caa82f9.txt
+│       │   ├── sha256-a24c09241b41e5862d666a62a4a9b5280dfb2b753c3cee482f4cf92001749213.txt
+│       │   ├── sha256-aef8b0684f22ee562202d4e52988318f60e3104d1eabdd236877fbfa8fe34054.txt
+│       │   ├── sha256-b395d144c5b29ccdf09f42a01dbc75d6ebd62902606f751ebb48cff13a5afaa6.txt
+│       │   ├── sha256-ca17de96e051959a93d8c294a037f04f5cb6a6fd6618553457e5da7d09d563f7.txt
+│       │   ├── sha256-cbfdcb43c8a77f897fe5c3a06bc05ddc27a82a05b954a7f5e1cf476244f303d4.txt
+│       │   ├── sha256-cdeed96fef83e03043bb25081ad4b7abd26e739dfa464a0e1763c6473330bac3.txt
+│       │   ├── sha256-e2fdd18093dc69cb8fe82bb6bef674f20f8a5093d0d13fd1b7180f49dbe751fd.txt
+│       │   ├── sha256-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.txt
+│       │   ├── sha256-eaed95e3b7735549fa221cf701032c903967cd8121de0b9715492e144d3f07e4.txt
+│       │   ├── sha256-efc9d2901def3e0f2942d30b561ff864b94209aeb903dd0b7d9a88b5eb250f70.txt
+│       │   ├── sha256-f1738e4b42203e5f22bcb513f13fb2fb224f1e98d1f129ff042f87048665a94c.txt
+│       │   ├── sha256-fe697987e2be8967bc1cc84e5af6b9e647fb4f3b12b50d082a2d4a41bbc6f2e4.txt
+│       │   └── sha256-fff604ca350bc0cb1549d5d851558aacd4c0caa08fa8667be0c6372eaed243dd.txt
 │       └── tmp
+├── skills
+│   └── add-pi-mode
+│       └── SKILL.md
+├── AGENT_MODES.yml
 ├── .gitignore
 ├── index.ts
 ├── package.json
-└── README.md
+├── README.md
+└── TASKLIST.md
