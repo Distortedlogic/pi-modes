@@ -2,85 +2,72 @@
 
 ## Work Unit 1: Rename the Current Extension to `pi-modes`
 
-- [ ] Confirm that the current worktree has no unrelated changes and keep all Pi source repositories unchanged.
 - [ ] In `package.json`, set the package name to `pi-modes`, version to `0.3.0`, description to `A Pi extension that loads and cycles package and project modes from YAML.`, and repository URL to `git+https://github.com/Distortedlogic/pi-modes.git`.
 - [ ] In `index.ts`, change the widget key from `just-answer-mode` to `pi-modes`.
-- [ ] Update `README.md` and `skills/add-pi-mode/SKILL.md` so all names, repository links, and install commands use `pi-modes`.
-- [ ] Keep the root `index.ts`, `AGENT_MODES.yml`, package mode discovery, YAML parsing, source order, Shift+Tab behavior, suffix transformation, dependencies, and package resource declarations unchanged.
-- [ ] Search all tracked files and remove the remaining `pi-just-answer` and `just-answer` package identifiers.
+- [ ] Update `README.md` so its name, repository links, install commands, and examples use `pi-modes`.
+- [ ] Update `skills/add-pi-mode/SKILL.md` so its package references and instructions use `pi-modes`.
 
-## Work Unit 2: Validate and Release `pi-modes`
+## Work Unit 2: Release the Renamed `pi-modes` Package
 
-- [ ] Run the validation commands already present in the repository and run `git diff --check` without adding a test framework.
-- [ ] Load the local extension through Pi and confirm that mode loading, Shift+Tab wraparound, widget display, and one-time suffix insertion still work.
+- [ ] Run `rg 'pi-just-answer|just-answer'` on tracked files, remove each obsolete package identifier, and run `git diff --check`.
+- [ ] Load `index.ts` as a local Pi extension and test package mode loading, trusted project mode loading, Shift+Tab wraparound, widget output, and exact one-time suffix insertion.
 - [ ] Commit the rename with the message `Rename to pi-modes`.
-- [ ] Rename `Distortedlogic/pi-just-answer` to `Distortedlogic/pi-modes` on GitHub while preserving its history, tags, and visibility.
-- [ ] Update the local `origin`, push the renamed package, remove the old Git package source, and install `git:github.com/Distortedlogic/pi-modes` in the old package scope.
-- [ ] Reload Pi and confirm that one `pi-modes` extension loads and no `pi-just-answer` extension remains.
-- [ ] After the active Pi session exits, rename the local repository directory from `pi-just-answer` to `pi-modes` under its current parent directory.
+- [ ] Rename the GitHub repository from `Distortedlogic/pi-just-answer` to `Distortedlogic/pi-modes`.
+- [ ] Set `origin` to the renamed GitHub repository and push the rename commit.
+- [ ] Remove the global `git:github.com/Distortedlogic/pi-just-answer` package and install global `git:github.com/Distortedlogic/pi-modes`.
+- [ ] Reload Pi and test that one `pi-modes` extension loads with the existing mode behavior.
+- [ ] After this Pi session exits, rename the local repository directory to `pi-modes` under its current parent directory.
 
-## Work Unit 3: Create the `pi-prompts` Repository
+## Work Unit 3: Create the `pi-prompts` Package
 
-- [ ] Create an empty `~/repos/pi-prompts` directory and copy the complete Pi extension authoring template into it.
-- [ ] Replace all template name and description placeholders with `pi-prompts` and `A Pi extension that cycles native prompt templates into the editor.`.
-- [ ] Set `package.json` to version `0.1.0`, private visibility, repository URL `git+https://github.com/Distortedlogic/pi-prompts.git`, and the `pi-package` keyword.
+- [ ] Create `~/repos/pi-prompts` from the complete Pi extension authoring template.
+- [ ] Replace the template placeholders with package name `pi-prompts` and description `A Pi extension that cycles native prompt templates into the editor.`.
+- [ ] Set `package.json` to version `0.1.0`, private package status, repository URL `git+https://github.com/Distortedlogic/pi-prompts.git`, and keyword `pi-package`.
 - [ ] Declare `./src/index.ts` under `pi.extensions` and `./prompts` under `pi.prompts`.
-- [ ] Keep only `@earendil-works/pi-coding-agent` with peer range `*` as the runtime peer dependency.
-- [ ] Keep runtime code in `src/index.ts` and remove all template-only behavior.
-- [ ] Do not add YAML parsing, direct TUI imports, a build step, a prompt scanner, or a prompt-order configuration format.
-- [ ] Run `npm install` to create the package lock after package metadata is complete.
+- [ ] Declare `@earendil-works/pi-coding-agent` with peer range `*` as the only runtime peer dependency.
+- [ ] Replace the template runtime code with the prompt cycle implementation in `src/index.ts`.
+- [ ] Run `npm install` to create `package-lock.json`.
 
-## Work Unit 4: Add the Preset Prompt Collection
+## Work Unit 4: Add the Native Prompt Collection
 
-- [ ] Put the existing preset prompt Markdown files in `prompts/` and keep prompt names, descriptions, and content in those native Pi resources.
-- [ ] Use the prompt order returned by Pi and do not add custom sorting or duplicate prompt metadata to the extension.
-- [ ] Let Pi load package, global, and trusted project prompt resources through its native package and resource system.
-- [ ] Keep the copied `CONTEXT_PRELOAD.yml` baseline and do not preload prompt bodies, test files, or lock files.
+- [ ] Copy the existing preset prompt Markdown files into `prompts/` without changing their names, descriptions, or prompt text.
+- [ ] Use the native prompt order returned by Pi for package, global, and trusted project prompt resources.
 
 ## Work Unit 5: Implement Prompt Cycling
 
-- [ ] In `src/index.ts`, define Ctrl+Shift+P as the shortcut and `pi-prompts` as the widget key.
-- [ ] Keep the selected prompt name and editor draft as session-local in-memory state with no session persistence.
-- [ ] On each shortcut action, call `pi.getCommands()`, keep every command whose `source` is `prompt`, and preserve the returned order.
-- [ ] Select the first prompt on the first shortcut action and advance by one with modulo wraparound on each later action.
-- [ ] When the available prompt list changes, continue after the selected prompt by name or select the first prompt when that name is absent.
-- [ ] On the first cycle, save the complete current editor text as the draft.
-- [ ] On later cycles, preserve the text after the generated `/<selected-prompt>` prefix as the updated draft.
-- [ ] When the current editor no longer starts with the generated prompt prefix, use the complete current editor text as the new draft.
-- [ ] Set the editor to `/<prompt-name>` for an empty draft and to `/<prompt-name> <draft>` for a non-empty draft.
-- [ ] Show `prompt: <name> (<position>/<count>)` in the `pi-prompts` widget below the editor.
-- [ ] When no prompt command exists, leave the editor unchanged and show `No prompt templates are available.` as a warning.
-- [ ] Use `pi.registerShortcut()` and editor UI methods only, and do not use raw terminal input or submit a message from the shortcut.
+- [ ] Define Ctrl+Shift+P as the registered shortcut and `pi-prompts` as the widget key in `src/index.ts`.
+- [ ] Store the selected prompt name and current editor draft as session-local variables.
+- [ ] On each shortcut action, call `pi.getCommands()`, filter for `source === "prompt"`, and keep the returned order.
+- [ ] Select the first prompt on the first shortcut action and advance with modulo wraparound on each later action.
+- [ ] After a prompt catalogue change, advance from the selected prompt name or restart at the first prompt when that name is absent.
+- [ ] On the first cycle, store the complete current editor text as the draft.
+- [ ] On later cycles, store the text after the generated `/<selected-prompt>` prefix as the updated draft.
+- [ ] If the editor no longer starts with the generated prompt prefix, store the complete editor text as the new draft.
+- [ ] Set the editor to `/<prompt-name>` when the draft is empty and `/<prompt-name> <draft>` when the draft is not empty.
+- [ ] Set the below-editor widget text to `prompt: <name> (<position>/<count>)` after each selection.
+- [ ] Leave the editor unchanged and show a warning with text `No prompt templates are available.` when the filtered list is empty.
+- [ ] Use `pi.registerShortcut()`, `ctx.ui.getEditorText()`, `ctx.ui.setEditorText()`, and `ctx.ui.setWidget()` without raw terminal handling or automatic submission.
 
-## Work Unit 6: Implement Lifecycle Behavior
+## Work Unit 6: Implement Prompt Lifecycle Reset
 
 - [ ] On `session_start`, reset the selected prompt and draft and clear the `pi-prompts` widget.
-- [ ] On `input`, clear the selected prompt, draft, and widget and return `continue` so Pi can perform native prompt expansion.
+- [ ] On `input`, reset the selected prompt and draft, clear the widget, and return `continue` for native prompt expansion.
 - [ ] On `session_shutdown`, clear the `pi-prompts` widget.
-- [ ] Use no timer, watcher, process, socket, custom message, or background resource.
-- [ ] Keep `pi-prompts` independent from `pi-modes` so Pi composes native prompt expansion with the existing mode input transform.
 
 ## Work Unit 7: Test and Document `pi-prompts`
 
-- [ ] Replace the template unit-test behavior with tests for prompt filtering, returned order, first selection, wraparound, changed catalogues, empty catalogues, and single-prompt catalogues.
-- [ ] Test draft capture, argument preservation, changed editor text, exact editor output, widget output, and lifecycle reset behavior.
-- [ ] Test that the shortcut changes editor text without sending a message.
-- [ ] Update the template end-to-end test so Pi loads `src/index.ts` through jiti without an LLM request.
-- [ ] Run tests with `PI_OFFLINE=1`, `--no-extensions`, the explicit extension path, and `--no-session`.
-- [ ] Use only the test files supplied by the template.
-- [ ] Replace the template `README.md` with install, removal, prompt resource, Ctrl+Shift+P, editor argument, cycle order, reload, and `pi-modes` interaction documentation.
-- [ ] Run the complete repository check script and `git diff --check`.
+- [ ] Replace the template unit tests with prompt filtering, returned order, first selection, wraparound, changed catalogue, empty catalogue, single prompt, draft preservation, exact editor output, widget output, and lifecycle reset cases.
+- [ ] Test that Ctrl+Shift+P changes the editor without sending a message.
+- [ ] Update the template end-to-end test to load `src/index.ts` through Pi with `PI_OFFLINE=1`, `--no-extensions`, the explicit extension path, and `--no-session` without an LLM request.
+- [ ] Replace the template `README.md` with installation, removal, native prompt resource, Ctrl+Shift+P, editor argument, cycle order, reload, and `pi-modes` interaction instructions.
+- [ ] Run the repository check script and `git diff --check`.
 
-## Work Unit 8: Validate, Publish, and Install `pi-prompts`
+## Work Unit 8: Integrate and Release `pi-prompts`
 
-- [ ] Load local `pi-modes` and `pi-prompts` together in one Pi TUI session without installed duplicate copies.
-- [ ] Confirm that Shift+Tab changes only the mode and Ctrl+Shift+P changes only the prompt invocation.
-- [ ] Confirm that both widgets remain visible under separate keys and that prompt submission clears only the prompt widget.
-- [ ] Confirm that cycling preserves prompt arguments, wraps in Pi command order, and reflects prompt changes after reload.
-- [ ] Confirm that Pi expands the selected native prompt and applies the active mode suffix exactly once.
-- [ ] Confirm that reload, session replacement, shutdown, print mode, JSON mode, and RPC mode do not leave stale state or cause startup errors.
-- [ ] Create `Distortedlogic/pi-prompts` as a private GitHub repository.
-- [ ] Commit the implementation with the message `Add prompt cycling` and push the default branch.
-- [ ] Install `git:github.com/Distortedlogic/pi-prompts` globally and reload Pi.
-- [ ] Confirm that Pi lists one `pi-modes` package and one `pi-prompts` package and does not list `pi-just-answer`.
-- [ ] Confirm that both worktrees are clean and record the two commit identifiers and completed checks.
+- [ ] Load local `pi-modes` and `pi-prompts` together and test Shift+Tab mode cycling, Ctrl+Shift+P prompt cycling, separate widgets, draft preservation, prompt wraparound, and lifecycle resets.
+- [ ] Submit a selected prompt and test native prompt expansion, prompt widget cleanup, persistent mode selection, and exact one-time mode suffix insertion.
+- [ ] Start Pi in print, JSON, and RPC modes with `pi-prompts` and test successful extension startup.
+- [ ] Create the private GitHub repository `Distortedlogic/pi-prompts`.
+- [ ] Commit `pi-prompts` with the message `Add prompt cycling` and push the default branch.
+- [ ] Install global `git:github.com/Distortedlogic/pi-prompts` and reload Pi.
+- [ ] Run `pi list` and verify that `pi-modes` and `pi-prompts` each occur once and `pi-just-answer` does not occur.
