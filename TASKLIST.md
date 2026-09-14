@@ -1,209 +1,167 @@
-# Package Mode Loading Task List
+# `pi-modes` and `pi-prompts` Implementation Task List
 
-## Scope
+## Work Unit 1: Establish the Change Baseline
 
-- [ ] Change only the `pi-just-answer` repository.
-- [ ] Do not change the Pi source repository.
-- [ ] Load package mode files from `package.json` entries under `pi.modes`.
-- [ ] Keep package discovery independent from Pi trust and package filtering.
-- [ ] Preserve all existing project, TUI, and input behavior.
-- [ ] Do not add package installation, update, settings parsing, event registration, file watching, or inline package modes.
+- [ ] Confirm that the current `pi-just-answer` worktree has no unrelated changes before the rename starts.
+- [ ] Record the current branch, Git remote, repository visibility, release tags, and installed Pi package source so the rename preserves them.
+- [ ] Confirm that the current repository has no test suite and do not add new test files only for the rename.
+- [ ] Keep all Pi source repositories unchanged because both features must use the published extension API.
+- [ ] Limit the current repository to mode loading and mode application, and put all prompt cycling behavior in the new repository.
 
-## Work Unit 1: Remove the Invalid Pi Integration
+## Work Unit 2: Rename the Current Package to `pi-modes`
 
-- [x] In `index.ts`, remove all use of `event.modePaths`.
-- [x] Change the `session_start` event parameter back to `_event` when the event data is not used.
-- [x] Keep the existing `session_start` lifecycle as the package scan entry point.
-- [x] Remove imports that become unused after `event.modePaths` is removed.
-- [x] Confirm that the extension uses only APIs available in `@earendil-works/pi-coding-agent >=0.85.1 <1`.
+- [ ] Change the package name in `package.json` from `pi-just-answer` to `pi-modes`.
+- [ ] Change the package description so it states that the extension loads and cycles package and project modes from YAML.
+- [ ] Change the repository URL in `package.json` to `git+https://github.com/Distortedlogic/pi-modes.git`.
+- [ ] Advance the package version from `0.2.0` to `0.3.0` for the renamed release.
+- [ ] Keep `./index.ts` as the extension entry point and do not restructure the existing repository during the rename.
+- [ ] Keep `yaml` as a runtime dependency because `index.ts` parses mode files with it.
+- [ ] Keep both Pi peer dependencies because `index.ts` imports the coding-agent and TUI packages directly.
+- [ ] Keep `pi.modes` and `pi.skills` in the package manifest without changing their current resource paths.
 
-### Completion criteria
+## Work Unit 3: Rename Mode-Specific Runtime Identifiers
 
-- [x] `index.ts` has no dependency on a modified Pi build.
-- [x] The extension starts when `session_start` does not contain `modePaths`.
+- [ ] Change the mode widget key in `index.ts` from `just-answer-mode` to `pi-modes`.
+- [ ] Keep `AGENT_MODES.yml`, the `exec` fallback, source precedence, YAML validation, and duplicate-name replacement unchanged.
+- [ ] Keep Shift+Tab as the mode cycle key and preserve key-repeat and key-release handling.
+- [ ] Keep mode suffix insertion, image forwarding, duplicate-suffix prevention, and extension-source exclusion unchanged.
+- [ ] Keep terminal input listener cleanup on session restart, reload, replacement, and shutdown unchanged.
+- [ ] Search tracked source files for `pi-just-answer`, `just-answer`, and old repository URLs, and replace only identifiers that belong to this package.
 
-## Work Unit 2: Define Package Discovery Locations
+## Work Unit 4: Update `pi-modes` Documentation and Skill Content
 
-- [x] Determine the Pi agent directory with this priority:
-  1. `PI_CODING_AGENT_DIR` when it is set.
-  2. `join(homedir(), CONFIG_DIR_NAME, "agent")` otherwise.
-- [x] Build the global scan roots:
-  - `<agentDir>/npm/node_modules`
-  - `<agentDir>/git`
-  - `<agentDir>/extensions`
-- [x] Build the project scan roots without a trust check:
-  - `<cwd>/<CONFIG_DIR_NAME>/npm/node_modules`
-  - `<cwd>/<CONFIG_DIR_NAME>/git`
-  - `<cwd>/<CONFIG_DIR_NAME>/extensions`
-- [x] Add `<cwd>/package.json` as a direct package manifest candidate.
-- [x] Keep global roots before project roots so project package modes load later.
-- [x] Ignore scan roots that do not exist.
+- [ ] Rewrite `README.md` names, repository links, install commands, examples, and descriptions to use `pi-modes`.
+- [ ] Keep the `README.md` contract for package `pi.modes` declarations, trusted project mode files, source order, and reload behavior accurate.
+- [ ] Update `skills/add-pi-mode/SKILL.md` so all package names, paths, links, and install instructions use `pi-modes`.
+- [ ] Keep the `add-pi-mode` skill focused on adding modes to global, project, or package scope.
+- [ ] Update `CONTEXT_PRELOAD.yml` only if the existing repository gains one through a separate approved change, and do not add it as part of this rename.
 
-### Completion criteria
+## Work Unit 5: Validate and Prepare the `pi-modes` Rename
 
-- [x] Package discovery does not read Pi settings.
-- [x] Package discovery does not call `ctx.isProjectTrusted()`.
-- [x] Package discovery does not install, update, enable, or disable packages.
+- [ ] Run every validation command already provided by the current repository without adding a new test framework.
+- [ ] Run `git diff --check` and correct all whitespace errors.
+- [ ] Load the local extension through Pi and confirm that it starts without a modified Pi build.
+- [ ] Confirm that package modes and the trusted project `AGENT_MODES.yml` still load in the established order.
+- [ ] Confirm that Shift+Tab cycles every configured mode and wraps to the first mode.
+- [ ] Confirm that submitted input receives the active mode suffix exactly once.
+- [ ] Review the complete diff and confirm that all functional changes are limited to rename identifiers.
 
-## Work Unit 3: Discover Package Manifests
+## Work Unit 6: Rename and Reinstall the `pi-modes` Repository
 
-- [x] Import and use Node's native `globSync()` implementation.
-- [x] Under each npm root, find:
-  - `*/package.json`
-  - `@*/*/package.json`
-- [x] Under each Git root, find `**/package.json`.
-- [x] Under each extension root, find `**/package.json`.
-- [x] Exclude `**/node_modules/**` from recursive Git and extension scans.
-- [x] Exclude `**/.git/**` from recursive Git and extension scans.
-- [x] Sort matches from each scan lexically.
-- [x] Normalize each manifest path.
-- [x] Deduplicate manifest paths while preserving the first occurrence.
-- [x] Do not scan other home, project, or system directories.
+- [ ] Rename the GitHub repository from `Distortedlogic/pi-just-answer` to `Distortedlogic/pi-modes` while preserving its history, tags, and visibility.
+- [ ] Update the local `origin` remote to the new `Distortedlogic/pi-modes` URL.
+- [ ] Commit the tracked rename changes with the message `Rename to pi-modes`.
+- [ ] Push the renamed branch and applicable tags to the renamed GitHub repository.
+- [ ] Remove `git:github.com/Distortedlogic/pi-just-answer` from the Pi package settings before installing the new source identity.
+- [ ] Install `git:github.com/Distortedlogic/pi-modes` in the same Pi scope that held the old package.
+- [ ] Reload or restart Pi and confirm that only one copy of the modes extension loads.
+- [ ] Leave the active Pi session before renaming the local directory from `pi-just-answer` to `pi-modes` under its current parent directory.
 
-### Completion criteria
+## Work Unit 7: Create the `pi-prompts` Repository from the Extension Template
 
-- [x] Unscoped npm packages are found.
-- [x] Scoped npm packages are found.
-- [x] Git-installed packages are found without scanning their dependencies.
-- [x] Extension-directory packages are found without scanning their dependencies.
-- [x] The current project package manifest is considered once.
+- [ ] Confirm that `~/repos/pi-prompts` does not exist or is empty, and stop if the target directory contains files.
+- [ ] Copy all content from the Pi extension authoring template into `~/repos/pi-prompts`, including `.gitignore`, tests, and `CONTEXT_PRELOAD.yml`.
+- [ ] Replace every `__NAME__` value with `pi-prompts` and every `__DESCRIPTION__` value with a short prompt-cycling description.
+- [ ] Keep all runtime TypeScript in `src/` and start with only `src/index.ts`.
+- [ ] Remove all template-only runtime behavior while preserving the template test and configuration structure.
+- [ ] Set the package repository URL to `git+https://github.com/Distortedlogic/pi-prompts.git` and keep the package private.
+- [ ] Include the `pi-package` keyword and declare `./src/index.ts` under `pi.extensions`.
+- [ ] Add only `@earendil-works/pi-coding-agent` as a runtime peer dependency unless the final source directly imports another Pi package.
+- [ ] Do not add `yaml`, `@earendil-works/pi-tui`, Vite, a build step, or a custom prompt parser.
+- [ ] Run `npm install` after the package metadata is complete so the repository has a current `package-lock.json`.
 
-## Work Unit 4: Read `pi.modes` Declarations
+## Work Unit 8: Add Native Pi Prompt Resources
 
-- [x] Read each discovered `package.json` as UTF-8.
-- [x] Remove an optional UTF-8 byte-order mark before JSON parsing.
-- [x] Skip malformed unrelated package manifests without stopping startup.
-- [x] Skip packages that do not contain `pi.modes`.
-- [x] Require `pi.modes` to be an array.
-- [x] Require each `pi.modes` entry to be a non-empty string.
-- [x] Report one clear error for an invalid `pi.modes` declaration.
-- [x] Resolve each entry relative to the directory that contains its `package.json`.
-- [x] Accept only paths ending in `.yml` or `.yaml`.
-- [x] Treat each entry as an exact path.
-- [x] Do not interpret globs, directories, `!`, `+`, or `-` in `pi.modes`.
-- [x] Preserve package order and declaration order.
-- [x] Normalize and deduplicate resolved mode file paths while preserving the first occurrence.
+- [ ] Create a top-level `prompts/` directory for the supplied preset Markdown prompt files.
+- [ ] Add each supplied preset as one native Pi Markdown prompt without copying its body into TypeScript.
+- [ ] Declare the prompt files under `pi.prompts` in the required cycle order instead of implementing a second resource scanner.
+- [ ] Give each prompt a unique command name that does not conflict with an extension command or a built-in interactive command.
+- [ ] Keep prompt descriptions and other supported prompt metadata in the Markdown files so Pi remains the source of prompt metadata.
+- [ ] Use Pi package and project resource loading for trust, filtering, reload, and prompt expansion behavior.
+- [ ] Add only the prompt files needed by this package to `CONTEXT_PRELOAD.yml`, and do not preload lock files or test files.
 
-### Completion criteria
+## Work Unit 9: Implement Prompt Discovery and Cycle State
 
-- [x] This declaration resolves `./AGENT_MODES.yml` from the package root:
+- [ ] Import only the extension types required by `src/index.ts` from `@earendil-works/pi-coding-agent`.
+- [ ] Obtain the current command catalogue with `pi.getCommands()` when the user cycles prompts so reload and project changes are visible.
+- [ ] Select only command entries whose `source` is `prompt` and preserve their Pi resource order.
+- [ ] Exclude prompt names that are shadowed by registered extension commands because Pi dispatches extension commands before prompt expansion.
+- [ ] Keep the current prompt index, selected prompt name, and editor draft as session-local in-memory state.
+- [ ] Initialize the prompt index so the first cycle selects the first available prompt.
+- [ ] Reconcile the selected prompt by name when the command catalogue changes, and restart from the first prompt if the selected prompt no longer exists.
+- [ ] Wrap from the final available prompt to the first available prompt.
+- [ ] Leave prompt selection unpersisted because it is temporary editor state and not conversation state.
 
-  ```json
-  {
-    "pi": {
-      "extensions": ["./index.ts"],
-      "modes": ["./AGENT_MODES.yml"]
-    }
-  }
-  ```
+## Work Unit 10: Implement Native Shortcut and Editor Behavior
 
-- [x] One bad package declaration does not block other package declarations.
+- [ ] Register Ctrl+Shift+P with `pi.registerShortcut()` and describe it as cycling native Pi prompts.
+- [ ] Do not register Ctrl+P because Pi reserves it for model controls.
+- [ ] Do not use `ctx.ui.onTerminalInput()` because native shortcut registration supplies conflict detection and Pi key handling.
+- [ ] Read the current editor text on the first cycle and preserve it as the prompt argument draft.
+- [ ] Set the editor to `/<prompt-name>` when the saved draft is empty.
+- [ ] Set the editor to `/<prompt-name> <draft>` when the saved draft is not empty.
+- [ ] On later cycles, replace only the selected prompt invocation and preserve user changes to the prompt arguments.
+- [ ] Treat editor text that no longer starts with the selected prompt invocation as a new draft before the next cycle.
+- [ ] Do not call `pi.sendUserMessage()` from the shortcut because selecting a prompt must not submit it.
+- [ ] Leave the slash command in the editor so Pi expands the current Markdown template only after the user submits it.
+- [ ] Leave the editor unchanged and show one warning notification when no native prompt commands are available.
 
-## Work Unit 5: Reuse One YAML Mode Loader
+## Work Unit 11: Implement Prompt UI and Lifecycle Cleanup
 
-- [x] Extract the current YAML read, parse, and validation logic into one local function.
-- [x] Give the function these inputs:
-  - mode file path;
-  - destination `Map<string, string>`;
-  - whether a missing file is optional;
-  - extension context for error reporting.
-- [x] Keep `parse(..., { mapAsMap: true })`.
-- [x] Require the YAML document to be a map.
-- [x] Require each mode name to be a non-empty string.
-- [x] Require each mode value to be a string.
-- [x] Keep an empty string as a valid mode value.
-- [x] Validate the complete file before adding any entry to the destination map.
-- [x] Skip only an optional missing file.
-- [x] Report all other read, parse, and validation errors.
-- [x] Continue with later files after an error.
+- [ ] Use `pi-prompts` as the prompt widget key so it cannot replace the `pi-modes` widget.
+- [ ] Show the selected prompt name and its cycle position in a one-line widget below the editor.
+- [ ] Reset the prompt index, selected prompt name, and saved draft during each `session_start` event.
+- [ ] Clear the prompt widget during each `session_start` event before new prompt state is used.
+- [ ] Clear the prompt cycle state and widget when selected input is submitted, while returning `continue` from the `input` handler.
+- [ ] Clear the prompt widget during `session_shutdown` so reload and session replacement do not leave stale UI.
+- [ ] Use no timer, watcher, process, socket, or other background resource.
+- [ ] Keep the extension inactive outside normal Pi resource discovery and shortcut events.
 
-### Completion criteria
+## Work Unit 12: Update the Template Tests for `pi-prompts`
 
-- [x] Package and project mode files use the same parser and validation rules.
-- [x] An invalid entry cannot cause a partial file load.
+- [ ] Replace the template unit-test behavior with tests for prompt filtering, stable order, first selection, wraparound, and catalogue changes.
+- [ ] Test that extension-command name collisions are excluded from the prompt cycle.
+- [ ] Test empty and single-prompt catalogues.
+- [ ] Test editor draft capture, prompt invocation replacement, argument edits, and new-draft detection.
+- [ ] Test state reset after input submission, session start, and session shutdown.
+- [ ] Test that prompt selection changes editor text without submitting a user message.
+- [ ] Update the existing end-to-end test so Pi loads `src/index.ts` through jiti without an LLM request.
+- [ ] Run behavior tests with `PI_OFFLINE=1`, `--no-extensions`, one explicit `--extension` path, and `--no-session` unless persistence is under test.
+- [ ] Inspect extension registration, command data, editor UI requests, or state directly instead of asking a model to confirm hidden behavior.
+- [ ] Do not create additional test files unless an existing template test file cannot hold a required test category.
 
-## Work Unit 6: Apply Source Order and Overrides
+## Work Unit 13: Document `pi-prompts`
 
-- [x] Load package mode files from global scan roots first.
-- [x] Load package mode files from project scan roots second.
-- [x] Load `<cwd>/<CONFIG_DIR_NAME>/AGENT_MODES.yml` last when the existing project trust check permits it.
-- [x] Mark package-declared files as required.
-- [x] Mark the existing global and project files as optional.
-- [x] Continue to use `configured.set(name, text)` for overrides.
-- [x] Keep later mode values as the winners for duplicate names.
-- [x] Do not add duplicate warnings or source metadata.
+- [ ] Replace the template `README.md` with installation, prompt resource, shortcut, editor, reload, and removal instructions for `pi-prompts`.
+- [ ] Document that Ctrl+Shift+P cycles prompts and Ctrl+P remains assigned to Pi model controls.
+- [ ] Document that the extension cycles native commands with `source: prompt` instead of reading Markdown files itself.
+- [ ] Document the prompt cycle order and how package manifest order controls package-owned presets.
+- [ ] Document how existing editor text becomes prompt arguments and remains editable before submission.
+- [ ] Document the no-prompt warning and command-name collision limits.
+- [ ] Document that prompt templates are one-time tasks while `pi-modes` supplies persistent per-message instructions.
+- [ ] Add a native `add-pi-prompt` skill only if its content gives a distinct workflow for adding global, project, and package prompt templates.
+- [ ] If `add-pi-prompt` is included, declare `./skills` under `pi.skills` and remove all template-only skill content.
 
-### Completion criteria
+## Work Unit 14: Validate Both Extensions Together
 
-- [x] Project package modes replace global package modes with the same name.
-- [x] The explicit project mode file has the highest priority.
-- [x] Duplicate replacement does not add a second cycle entry.
+- [ ] Run the complete `pi-prompts` check script and correct all type, format, lint, unit, and end-to-end failures.
+- [ ] Run `git diff --check` in both repositories.
+- [ ] Load both local extensions in one Pi TUI session without installed duplicate copies.
+- [ ] Confirm that Shift+Tab changes only the current mode and Ctrl+Shift+P changes only the prompt invocation in the editor.
+- [ ] Confirm that the `pi-modes` and `pi-prompts` widgets can appear without replacing each other.
+- [ ] Confirm that repeated prompt cycling preserves the current editor arguments.
+- [ ] Confirm that submitting a selected prompt clears only the prompt widget and leaves the current mode active.
+- [ ] Confirm that Pi expands the selected native prompt and that `pi-modes` applies its suffix exactly once.
+- [ ] Confirm that `/reload`, `/new`, `/resume`, and shutdown do not retain stale prompt state or widgets.
+- [ ] Confirm that print, JSON, and RPC startup do not fail even though prompt cycling is a TUI shortcut feature.
 
-## Work Unit 7: Preserve Existing Runtime Behavior
+## Work Unit 15: Publish and Install `pi-prompts`
 
-- [x] Keep `["exec", ""]` as the fallback when no valid mode is loaded.
-- [x] Do not add `exec` when configured modes exist and do not define it.
-- [x] Reset `modeIndex` to zero during each `session_start`.
-- [x] Keep the existing widget key and placement.
-- [x] Keep `Shift+Tab` mode cycling.
-- [x] Keep key-repeat and key-release consumption.
-- [x] Keep terminal input listener cleanup before reinitialization.
-- [x] Keep terminal input listener cleanup during `session_shutdown`.
-- [x] Keep the existing separator text.
-- [x] Keep duplicate-suffix prevention.
-- [x] Keep extension-source input exclusion.
-- [x] Keep image forwarding in transformed input.
-
-### Completion criteria
-
-- [x] Package discovery changes only the set of available modes.
-- [x] Existing project mode behavior remains unchanged.
-
-## Work Unit 8: Update Package Documentation
-
-- [x] Populate `README.md` with installation and configuration instructions.
-- [x] Add a `pi.modes` package manifest example.
-- [x] State that each `pi.modes` entry is an exact relative YAML file path.
-- [x] List all package scan locations.
-- [x] Document global package, project package, and project-file source priority.
-- [x] State that package discovery does not use Pi trust or package filters.
-- [x] Document error behavior.
-- [x] Tell users to run `/reload` after a manifest or mode file change.
-- [x] Verify `skills/add-pi-mode/SKILL.md` instructs package owners to add exact files under `pi.modes`.
-- [x] Keep the package description accurate for package, global, and project modes.
-- [x] Keep version `0.2.0` for this feature.
-
-## Work Unit 9: Validate the Implementation
-
-- [x] Do not create a new test suite because this repository does not have one.
-- [x] Run the available TypeScript or package validation command if the repository provides one.
-- [x] Run `git diff --check`.
-- [x] Start Pi with the local extension.
-- [x] Verify an unscoped npm package mode.
-- [x] Verify a scoped npm package mode.
-- [x] Verify a Git package mode.
-- [x] Verify an extension-directory package mode.
-- [x] Verify a current project package mode.
-- [x] Verify more than one mode file in one package.
-- [x] Verify duplicate mode replacement across global and project package roots.
-- [x] Verify package-owned `AGENT_MODES.yml` loads from the globally installed extension.
-- [x] Verify project `AGENT_MODES.yml` overrides all earlier sources.
-- [x] Verify malformed `package.json` does not stop startup.
-- [x] Verify invalid `pi.modes` reports an error and does not stop other packages.
-- [x] Verify a missing declared mode file reports an error.
-- [x] Verify malformed YAML reports an error.
-- [x] Verify the `exec` fallback when no valid mode exists.
-- [x] Verify `/reload` finds manifest and YAML changes.
-- [x] Verify `Shift+Tab` cycles through the final mode order.
-- [x] Verify submitted input receives the selected suffix exactly once.
-
-## Work Unit 10: Final Review and Commit
-
-- [x] Confirm that no file outside `pi-just-answer` changed.
-- [x] Confirm that no Pi source file changed.
-- [x] Confirm that no dependency was added.
-- [x] Confirm that package discovery contains no trust check.
-- [x] Confirm that package discovery contains no settings parser or package manager implementation.
-- [x] Confirm that the implementation follows the fixed scan locations and exact-path contract.
-- [x] Review the final diff for unrelated edits.
-- [x] Commit the completed implementation with a minimal, accurate message.
+- [ ] Review the final `pi-prompts` diff and remove all unrelated files, dependencies, comments, and template behavior.
+- [ ] Commit the completed `pi-prompts` implementation with the message `Add prompt cycling`.
+- [ ] Create `Distortedlogic/pi-prompts` as a private GitHub repository.
+- [ ] Push the default branch to the private repository.
+- [ ] Install `git:github.com/Distortedlogic/pi-prompts` in the required Pi scope.
+- [ ] Reload or restart Pi after both Git package sources are installed.
+- [ ] Confirm with the Pi package list that `pi-modes` and `pi-prompts` each load once and `pi-just-answer` is absent.
+- [ ] Confirm the final working trees are clean and report the two commit identifiers, repository URLs, installed package sources, checks, and manual verification results.
