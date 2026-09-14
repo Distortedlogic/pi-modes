@@ -163,17 +163,17 @@
 
 ## Work Unit 8: Update Package Documentation
 
-- [ ] Populate `README.md` with installation and configuration instructions.
-- [ ] Add a `pi.modes` package manifest example.
-- [ ] State that each `pi.modes` entry is an exact relative YAML file path.
-- [ ] List all package scan locations.
-- [ ] Document package, global, and project source priority.
-- [ ] State that package discovery does not use Pi trust or package filters.
-- [ ] Document error behavior.
-- [ ] Tell users to run `/reload` after a manifest or mode file change.
-- [ ] Verify `docs/global-skills/add-pi-mode/SKILL.md` instructs package owners to add exact files under `pi.modes`.
-- [ ] Keep the package description accurate for package, global, and project modes.
-- [ ] Keep version `0.2.0` for this feature.
+- [x] Populate `README.md` with installation and configuration instructions.
+- [x] Add a `pi.modes` package manifest example.
+- [x] State that each `pi.modes` entry is an exact relative YAML file path.
+- [x] List all package scan locations.
+- [x] Document package, global, and project source priority.
+- [x] State that package discovery does not use Pi trust or package filters.
+- [x] Document error behavior.
+- [x] Tell users to run `/reload` after a manifest or mode file change.
+- [x] Verify `docs/global-skills/add-pi-mode/SKILL.md` instructs package owners to add exact files under `pi.modes`.
+- [x] Keep the package description accurate for package, global, and project modes.
+- [x] Keep version `0.2.0` for this feature.
 
 ## Work Unit 9: Validate the Implementation
 
