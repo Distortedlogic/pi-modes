@@ -1,8 +1,8 @@
 {
   "name": "pi-just-answer",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "A pi extension that loads global and project prompt modes from YAML.",
+  "description": "A pi extension that loads package, global, and project prompt modes from YAML.",
   "type": "module",
   "keywords": [
     "pi-package"

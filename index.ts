@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { join, normalize } from "node:path";
 import { CONFIG_DIR_NAME, type ExtensionAPI, type ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { isKeyRelease, isKeyRepeat, matchesKey } from "@earendil-works/pi-tui";
 import { parse } from "yaml";
@@ -20,15 +20,21 @@ export default function (pi: ExtensionAPI) {
 		ctx.ui.setWidget(WIDGET_KEY, content, { placement: "belowEditor" });
 	};
 
-	pi.on("session_start", async (_event, ctx) => {
+	pi.on("session_start", async (event, ctx) => {
 		removeTerminalInputListener?.();
 		removeTerminalInputListener = undefined;
 
-		const paths = [join(homedir(), CONFIG_DIR_NAME, MODES_FILE)];
-		if (ctx.isProjectTrusted()) paths.push(join(ctx.cwd, CONFIG_DIR_NAME, MODES_FILE));
+		const paths = [...new Set((event.modePaths ?? []).map((path) => normalize(path)))].map((path) => ({
+			path,
+			optional: false,
+		}));
+		paths.push({ path: join(homedir(), CONFIG_DIR_NAME, MODES_FILE), optional: true });
+		if (ctx.isProjectTrusted()) {
+			paths.push({ path: join(ctx.cwd, CONFIG_DIR_NAME, MODES_FILE), optional: true });
+		}
 		const configured = new Map<string, string>();
 
-		for (const path of paths) {
+		for (const { path, optional } of paths) {
 			try {
 				const document: unknown = parse(await readFile(path, "utf8"), { mapAsMap: true });
 				if (document === null) continue;
@@ -43,7 +49,7 @@ export default function (pi: ExtensionAPI) {
 				}
 				for (const [name, text] of entries) configured.set(name, text);
 			} catch (error) {
-				if (error instanceof Error && "code" in error && error.code === "ENOENT") continue;
+				if (optional && error instanceof Error && "code" in error && error.code === "ENOENT") continue;
 				const message = `Cannot load modes from ${path}: ${error instanceof Error ? error.message : String(error)}`;
 				if (ctx.hasUI) ctx.ui.notify(message, "error");
 				else console.error(message);
