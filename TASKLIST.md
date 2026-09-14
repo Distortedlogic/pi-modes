@@ -70,23 +70,23 @@
 
 ## Work Unit 4: Read `pi.modes` Declarations
 
-- [ ] Read each discovered `package.json` as UTF-8.
-- [ ] Remove an optional UTF-8 byte-order mark before JSON parsing.
-- [ ] Skip malformed unrelated package manifests without stopping startup.
-- [ ] Skip packages that do not contain `pi.modes`.
-- [ ] Require `pi.modes` to be an array.
-- [ ] Require each `pi.modes` entry to be a non-empty string.
-- [ ] Report one clear error for an invalid `pi.modes` declaration.
-- [ ] Resolve each entry relative to the directory that contains its `package.json`.
-- [ ] Accept only paths ending in `.yml` or `.yaml`.
-- [ ] Treat each entry as an exact path.
-- [ ] Do not interpret globs, directories, `!`, `+`, or `-` in `pi.modes`.
-- [ ] Preserve package order and declaration order.
-- [ ] Normalize and deduplicate resolved mode file paths while preserving the first occurrence.
+- [x] Read each discovered `package.json` as UTF-8.
+- [x] Remove an optional UTF-8 byte-order mark before JSON parsing.
+- [x] Skip malformed unrelated package manifests without stopping startup.
+- [x] Skip packages that do not contain `pi.modes`.
+- [x] Require `pi.modes` to be an array.
+- [x] Require each `pi.modes` entry to be a non-empty string.
+- [x] Report one clear error for an invalid `pi.modes` declaration.
+- [x] Resolve each entry relative to the directory that contains its `package.json`.
+- [x] Accept only paths ending in `.yml` or `.yaml`.
+- [x] Treat each entry as an exact path.
+- [x] Do not interpret globs, directories, `!`, `+`, or `-` in `pi.modes`.
+- [x] Preserve package order and declaration order.
+- [x] Normalize and deduplicate resolved mode file paths while preserving the first occurrence.
 
 ### Completion criteria
 
-- [ ] This declaration resolves `./AGENT_MODES.yml` from the package root:
+- [x] This declaration resolves `./AGENT_MODES.yml` from the package root:
 
   ```json
   {
@@ -97,7 +97,7 @@
   }
   ```
 
-- [ ] One bad package declaration does not block other package declarations.
+- [x] One bad package declaration does not block other package declarations.
 
 ## Work Unit 5: Reuse One YAML Mode Loader
 
