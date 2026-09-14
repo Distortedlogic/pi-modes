@@ -124,22 +124,22 @@
 
 ## Work Unit 6: Apply Source Order and Overrides
 
-- [ ] Load package mode files from global scan roots first.
-- [ ] Load package mode files from project scan roots second.
-- [ ] Load `~/.pi/AGENT_MODES.yml` third.
-- [ ] Load `<cwd>/<CONFIG_DIR_NAME>/AGENT_MODES.yml` last when the existing project trust check permits it.
-- [ ] Mark package-declared files as required.
-- [ ] Mark the existing global and project files as optional.
-- [ ] Continue to use `configured.set(name, text)` for overrides.
-- [ ] Keep later mode values as the winners for duplicate names.
-- [ ] Do not add duplicate warnings or source metadata.
+- [x] Load package mode files from global scan roots first.
+- [x] Load package mode files from project scan roots second.
+- [x] Load `~/.pi/AGENT_MODES.yml` third.
+- [x] Load `<cwd>/<CONFIG_DIR_NAME>/AGENT_MODES.yml` last when the existing project trust check permits it.
+- [x] Mark package-declared files as required.
+- [x] Mark the existing global and project files as optional.
+- [x] Continue to use `configured.set(name, text)` for overrides.
+- [x] Keep later mode values as the winners for duplicate names.
+- [x] Do not add duplicate warnings or source metadata.
 
 ### Completion criteria
 
-- [ ] Project package modes replace global package modes with the same name.
-- [ ] The explicit global mode file replaces package modes with the same name.
-- [ ] The explicit project mode file has the highest priority.
-- [ ] Duplicate replacement does not add a second cycle entry.
+- [x] Project package modes replace global package modes with the same name.
+- [x] The explicit global mode file replaces package modes with the same name.
+- [x] The explicit project mode file has the highest priority.
+- [x] Duplicate replacement does not add a second cycle entry.
 
 ## Work Unit 7: Preserve Existing Runtime Behavior
 

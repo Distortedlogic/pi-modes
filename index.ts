@@ -12,7 +12,7 @@ const WIDGET_KEY = "just-answer-mode";
 
 async function loadModeFile(
 	path: string,
-	destination: Map<string, string>,
+	configured: Map<string, string>,
 	optional: boolean,
 	ctx: ExtensionContext,
 ): Promise<void> {
@@ -27,7 +27,7 @@ async function loadModeFile(
 			}
 			entries.push([name, text]);
 		}
-		for (const [name, text] of entries) destination.set(name, text);
+		for (const [name, text] of entries) configured.set(name, text);
 	} catch (error) {
 		if (optional && error instanceof Error && "code" in error && error.code === "ENOENT") return;
 		const message = `Cannot load modes from ${path}: ${error instanceof Error ? error.message : String(error)}`;
