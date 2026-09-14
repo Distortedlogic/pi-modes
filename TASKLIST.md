@@ -169,7 +169,7 @@
 - [x] State that package discovery does not use Pi trust or package filters.
 - [x] Document error behavior.
 - [x] Tell users to run `/reload` after a manifest or mode file change.
-- [x] Verify `docs/global-skills/add-pi-mode/SKILL.md` instructs package owners to add exact files under `pi.modes`.
+- [x] Verify `skills/add-pi-mode/SKILL.md` instructs package owners to add exact files under `pi.modes`.
 - [x] Keep the package description accurate for package, global, and project modes.
 - [x] Keep version `0.2.0` for this feature.
 

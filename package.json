@@ -18,6 +18,9 @@
     ],
     "modes": [
       "./AGENT_MODES.yml"
+    ],
+    "skills": [
+      "./skills"
     ]
   },
   "peerDependencies": {
