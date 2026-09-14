@@ -11,16 +11,16 @@
 
 ## Work Unit 1: Remove the Invalid Pi Integration
 
-- [ ] In `index.ts`, remove all use of `event.modePaths`.
-- [ ] Change the `session_start` event parameter back to `_event` when the event data is not used.
-- [ ] Keep the existing `session_start` lifecycle as the package scan entry point.
-- [ ] Remove imports that become unused after `event.modePaths` is removed.
-- [ ] Confirm that the extension uses only APIs available in `@earendil-works/pi-coding-agent >=0.85.1 <1`.
+- [x] In `index.ts`, remove all use of `event.modePaths`.
+- [x] Change the `session_start` event parameter back to `_event` when the event data is not used.
+- [x] Keep the existing `session_start` lifecycle as the package scan entry point.
+- [x] Remove imports that become unused after `event.modePaths` is removed.
+- [x] Confirm that the extension uses only APIs available in `@earendil-works/pi-coding-agent >=0.85.1 <1`.
 
 ### Completion criteria
 
-- [ ] `index.ts` has no dependency on a modified Pi build.
-- [ ] The extension starts when `session_start` does not contain `modePaths`.
+- [x] `index.ts` has no dependency on a modified Pi build.
+- [x] The extension starts when `session_start` does not contain `modePaths`.
 
 ## Work Unit 2: Define Package Discovery Locations
 

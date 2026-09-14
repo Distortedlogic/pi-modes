@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
-import { join, normalize } from "node:path";
+import { join } from "node:path";
 import { CONFIG_DIR_NAME, type ExtensionAPI, type ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { isKeyRelease, isKeyRepeat, matchesKey } from "@earendil-works/pi-tui";
 import { parse } from "yaml";
@@ -20,15 +20,11 @@ export default function (pi: ExtensionAPI) {
 		ctx.ui.setWidget(WIDGET_KEY, content, { placement: "belowEditor" });
 	};
 
-	pi.on("session_start", async (event, ctx) => {
+	pi.on("session_start", async (_event, ctx) => {
 		removeTerminalInputListener?.();
 		removeTerminalInputListener = undefined;
 
-		const paths = [...new Set((event.modePaths ?? []).map((path) => normalize(path)))].map((path) => ({
-			path,
-			optional: false,
-		}));
-		paths.push({ path: join(homedir(), CONFIG_DIR_NAME, MODES_FILE), optional: true });
+		const paths = [{ path: join(homedir(), CONFIG_DIR_NAME, MODES_FILE), optional: true }];
 		if (ctx.isProjectTrusted()) {
 			paths.push({ path: join(ctx.cwd, CONFIG_DIR_NAME, MODES_FILE), optional: true });
 		}
