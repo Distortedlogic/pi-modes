@@ -10,42 +10,39 @@ Install the package from Git:
 pi install git:github.com/Distortedlogic/pi-modes
 ```
 
-You can also install a local checkout:
-
-```sh
-pi install ./pi-modes
-```
-
 ## Configure modes
 
-Put modes in the `modes` map of `AGENTS.yml`. Each mode name must be a non-empty string. Each value must be a string. An empty string is valid and adds no text.
+Put modes in `pi.extensions.pi-modes` in `AGENTS.yml`. Each mode name must contain a non-whitespace character. Each value must be a string. An empty string is valid and adds no text.
 
 ```yaml
-preload:
-  files:
-    - "src/**/*.ts"
-modes:
-  exec: ""
-  brief: "Give a brief answer."
-  review: "Review the code and report defects."
-prompts:
-  summarize:
-    body: "Summarize the changes."
+pi:
+  extensions:
+    pi-context-preload:
+      files:
+        - "src/**/*.ts"
+    pi-modes:
+      exec: ""
+      brief: "Give a brief answer."
+      review: "Review the code and report defects."
+    pi-prompts:
+      prompts:
+        summarize:
+          body: "Summarize the changes."
 ```
 
-Edit only the `modes` map and preserve unrelated top-level keys such as `preload` and `prompts`.
+Edit only `pi.extensions.pi-modes` and preserve unrelated top-level keys and other `pi.extensions` entries.
 
 If no valid mode is available, the extension uses `exec` with an empty value. If configured modes exist without `exec`, the extension does not add `exec`.
 
 ### Package modes
 
-A package provides modes in the `modes` map of the `AGENTS.yml` file next to its `package.json`. Other top-level keys are ignored by `pi-modes`.
+A package provides modes in `pi.extensions.pi-modes` in the `AGENTS.yml` file next to its `package.json`. Other sections are ignored by `pi-modes`.
 
 ### Project modes
 
-Put project modes in the `modes` map of `<cwd>/AGENTS.yml`.
+Put project modes in `pi.extensions.pi-modes` in `<cwd>/AGENTS.yml`.
 
-The project file and its `modes` key are optional. The extension reads the file only when Pi trusts the project.
+The project file and its owned section are optional. The extension reads the file only when Pi trusts the project.
 
 ## Select a mode from an extension
 
@@ -75,7 +72,7 @@ It then scans these project locations:
 
 The npm scans include direct unscoped and scoped packages. The Git and extension scans are recursive, but they exclude `node_modules` and `.git` directories.
 
-Package discovery uses `package.json` files only to identify package roots. It reads each sibling `AGENTS.yml` file when present. Package discovery does not use Pi project trust or Pi package filters. It does not read Pi settings to select packages. The separate `<cwd>/AGENTS.yml` project source requires project trust.
+Package discovery uses `package.json` files only to identify package roots. It reads each sibling `AGENTS.yml` file when present. Project package locations and the separate `<cwd>/AGENTS.yml` source require project trust. Package discovery does not read Pi settings to select packages.
 
 ## Source priority
 
@@ -89,8 +86,8 @@ A later value replaces an earlier value with the same mode name. The mode stays 
 
 ## Errors and reloads
 
-The extension ignores package roots without `AGENTS.yml` and `AGENTS.yml` files without a `modes` key.
+The extension ignores package roots without `AGENTS.yml` and `AGENTS.yml` files without `pi.extensions.pi-modes`.
 
-Malformed YAML or an invalid `modes` map reports an error. The extension continues with later files. It validates a complete `modes` map before it adds any mode from that source. A missing optional project `AGENTS.yml` file does not report an error.
+Malformed YAML or an invalid `pi.extensions.pi-modes` map reports an error. The extension continues with later files. It validates the complete owned section before it adds any mode from that source. A missing optional project `AGENTS.yml` file does not report an error.
 
 Run `/reload` after you change an `AGENTS.yml` file.
