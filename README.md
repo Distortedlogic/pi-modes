@@ -21,11 +21,19 @@ pi install ./pi-modes
 Put modes in the `modes` map of `AGENTS.yml`. Each mode name must be a non-empty string. Each value must be a string. An empty string is valid and adds no text.
 
 ```yaml
+preload:
+  files:
+    - "src/**/*.ts"
 modes:
   exec: ""
   brief: "Give a brief answer."
   review: "Review the code and report defects."
+prompts:
+  summarize:
+    body: "Summarize the changes."
 ```
+
+Edit only the `modes` map and preserve unrelated top-level keys such as `preload` and `prompts`.
 
 If no valid mode is available, the extension uses `exec` with an empty value. If configured modes exist without `exec`, the extension does not add `exec`.
 

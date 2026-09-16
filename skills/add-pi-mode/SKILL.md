@@ -5,6 +5,19 @@ description: Use when the user asks to add a mode to the pi-modes extension glob
 
 # Add a mode to pi-modes
 
+All scopes use one combined root `AGENTS.yml`. Edit only `modes` and preserve unrelated top-level keys:
+
+```yaml
+preload:
+  files:
+    - "src/**/*.ts"
+modes:
+  review: "Review the changes."
+prompts:
+  summarize:
+    body: "Summarize the changes."
+```
+
 1. Use the requested scope. If the scope is not clear, ask which scope:
    - Global: the `modes` map in the package-root `AGENTS.yml` of `pi-modes`
    - Project: the `modes` map in `<cwd>/AGENTS.yml`
