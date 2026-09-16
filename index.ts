@@ -38,7 +38,7 @@ async function loadModes(path: string): Promise<Configuration | undefined> {
 	}
 	const value =
 		typeof document === "object" && document !== null && !Array.isArray(document)
-			? (document as Record<string, unknown>)["pi-modes"]
+			? (document as Record<string, unknown>)[OWNED_SECTION_PATH]
 			: undefined;
 	if (value === undefined) return;
 
