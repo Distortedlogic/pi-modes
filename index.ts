@@ -20,10 +20,6 @@ const OWNED_SECTION_PATH = "pi-modes";
 const SEPARATOR = " --- ";
 const WIDGET_KEY = "pi-modes";
 
-function isObject(value: unknown): value is Record<string, unknown> {
-	return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
 function sourceError(
 	path: string,
 	kind: "parse" | "validation",
@@ -37,57 +33,32 @@ function sourceError(
 	return new Error(message, { cause: error });
 }
 
-function getOwnedConfiguration(document: unknown) {
-	if (!isObject(document)) return;
-	return document["pi-modes"];
-}
-
-async function loadModes(
-	path: string,
-	configured: Map<string, string>,
-	optional: boolean,
-	ctx: ExtensionContext,
-): Promise<void> {
+async function loadModes(path: string, optional: boolean): Promise<Configuration | undefined> {
+	let source: string;
 	try {
-		let source: string;
-		try {
-			source = await readFile(path, "utf8");
-		} catch (error) {
-			if (
-				optional &&
-				error instanceof Error &&
-				"code" in error &&
-				error.code === "ENOENT"
-			)
-				return;
-			const detail = error instanceof Error ? error.message : String(error);
-			throw new Error(
-				`Cannot read ${path} at ${OWNED_SECTION_PATH}: ${detail}`,
-				{ cause: error },
-			);
-		}
-
-		let document: unknown;
-		try {
-			document = parse(source);
-		} catch (error) {
-			throw sourceError(path, "parse", error);
-		}
-		const value = getOwnedConfiguration(document);
-		if (value === undefined) return;
-
-		let configuration: Configuration;
-		try {
-			configuration = Value.Parse(configurationSchema, value);
-		} catch (error) {
-			throw sourceError(path, "validation", error);
-		}
-		for (const [name, text] of Object.entries(configuration))
-			configured.set(name, text);
+		source = await readFile(path, "utf8");
 	} catch (error) {
-		const message = error instanceof Error ? error.message : String(error);
-		if (ctx.hasUI) ctx.ui.notify(message, "error");
-		else console.error(message);
+		if (optional && error instanceof Error && "code" in error && error.code === "ENOENT") return;
+		const detail = error instanceof Error ? error.message : String(error);
+		throw new Error(`Cannot read ${path} at ${OWNED_SECTION_PATH}: ${detail}`, { cause: error });
+	}
+
+	let document: unknown;
+	try {
+		document = parse(source);
+	} catch (error) {
+		throw sourceError(path, "parse", error);
+	}
+	const value =
+		typeof document === "object" && document !== null && !Array.isArray(document)
+			? (document as Record<string, unknown>)["pi-modes"]
+			: undefined;
+	if (value === undefined) return;
+
+	try {
+		return Value.Parse(configurationSchema, value);
+	} catch (error) {
+		throw sourceError(path, "validation", error);
 	}
 }
 
@@ -152,7 +123,15 @@ export default function (pi: ExtensionAPI) {
 		const configured = new Map<string, string>();
 
 		for (const { path, optional } of paths) {
-			await loadModes(path, configured, optional, ctx);
+			try {
+				const configuration = await loadModes(path, optional);
+				if (!configuration) continue;
+				for (const [name, text] of Object.entries(configuration)) configured.set(name, text);
+			} catch (error) {
+				const message = error instanceof Error ? error.message : String(error);
+				if (ctx.hasUI) ctx.ui.notify(message, "error");
+				else console.error(message);
+			}
 		}
 
 		modes = configured.size > 0 ? [...configured] : [["exec", ""]];
