@@ -1,0 +1,14 @@
+preload:
+  extends:
+    - "pi-extension"
+  files:
+    - "index.ts"
+    - "package.json"
+modes:
+  none: ""
+  answer: "no tool calls, just answer"
+  targeted-edits: >-
+    do the targeted edit calls to execute this task. u may use the write tool if u need a new file,
+    or the read tool if an edit fails on needed a new read, or bash to commit at the end. then halt.
+  no-lazy: >-
+    stop giving me low effort responses. u have all the context needed n it should be clear what i am asking for such that if u put in the effort that u will generate a good response. --- no tool calls, just answer.

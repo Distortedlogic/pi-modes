@@ -16,13 +16,16 @@
     "extensions": [
       "./index.ts"
     ],
-    "modes": [
-      "./AGENT_MODES.yml"
-    ],
     "skills": [
       "./skills"
     ]
   },
+  "files": [
+    "index.ts",
+    "AGENTS.yml",
+    "README.md",
+    "skills"
+  ],
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": ">=0.85.1 <1",
     "@earendil-works/pi-tui": ">=0.85.1 <1"
