@@ -9,7 +9,3 @@ export const configurationSchema = Type.Record(
 );
 
 export type Configuration = Static<typeof configurationSchema>;
-
-export const agentsSection = {
-	"pi-modes": Type.Optional(configurationSchema),
-} as const;

@@ -13,7 +13,7 @@ import { parse } from "yaml";
 import { type Configuration, configurationSchema } from "./agents.ts";
 
 const AGENTS_FILE = "AGENTS.yml";
-const OWNED_SECTION_PATH = "pi.extensions.pi-modes";
+const OWNED_SECTION_PATH = "pi-modes";
 const SEPARATOR = " --- ";
 const WIDGET_KEY = "pi-modes";
 
@@ -36,11 +36,7 @@ function sourceError(
 
 function getOwnedConfiguration(document: unknown) {
 	if (!isObject(document)) return;
-	const piConfiguration = document.pi;
-	if (!isObject(piConfiguration)) return;
-	const extensions = piConfiguration.extensions;
-	if (!isObject(extensions)) return;
-	return extensions["pi-modes"];
+	return document["pi-modes"];
 }
 
 async function loadModes(
