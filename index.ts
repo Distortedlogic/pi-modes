@@ -1,11 +1,14 @@
-import { existsSync, globSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
-import { dirname, join, normalize } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
 	CONFIG_DIR_NAME,
+	DefaultPackageManager,
 	type ExtensionAPI,
 	type ExtensionContext,
+	SettingsManager,
 } from "@earendil-works/pi-coding-agent";
 import { isKeyRelease, isKeyRepeat, matchesKey } from "@earendil-works/pi-tui";
 import { Value } from "typebox/value";
@@ -115,47 +118,35 @@ export default function (pi: ExtensionAPI) {
 		const agentDir =
 			process.env.PI_CODING_AGENT_DIR ??
 			join(homedir(), CONFIG_DIR_NAME, "agent");
-		const globalPackageRoots = [
-			{ path: join(agentDir, "npm", "node_modules"), type: "npm" },
-			{ path: join(agentDir, "git"), type: "git" },
-			{ path: join(agentDir, "extensions"), type: "extensions" },
-		];
+		const settingsManager = SettingsManager.create(ctx.cwd, agentDir);
+		const packageManager = new DefaultPackageManager({
+			cwd: ctx.cwd,
+			agentDir,
+			settingsManager,
+		});
+		const configuredPackages = packageManager.listConfiguredPackages();
+		const packageAgentsPaths = (scope: "user" | "project") =>
+			configuredPackages
+				.filter(({ scope: packageScope }) => packageScope === scope)
+				.flatMap(({ installedPath }) => {
+					if (!installedPath) return [];
+					const path = join(installedPath, AGENTS_FILE);
+					return existsSync(path) ? [path] : [];
+				});
 		const projectTrusted = ctx.isProjectTrusted();
-		const projectPackageDir = join(ctx.cwd, CONFIG_DIR_NAME);
-		const projectPackageRoots = projectTrusted
-			? [
-					{ path: join(projectPackageDir, "npm", "node_modules"), type: "npm" },
-					{ path: join(projectPackageDir, "git"), type: "git" },
-					{ path: join(projectPackageDir, "extensions"), type: "extensions" },
-				]
-			: [];
-		const packageScanRoots = [
-			...globalPackageRoots,
-			...projectPackageRoots,
-		].filter(({ path }) => existsSync(path));
-		const packageAgentsCandidates: string[] = [];
-		for (const root of packageScanRoots) {
-			const matches =
-				root.type === "npm"
-					? [
-							...globSync("*/package.json", { cwd: root.path }),
-							...globSync("@*/*/package.json", { cwd: root.path }),
-						]
-					: globSync("**/package.json", {
-							cwd: root.path,
-							exclude: ["**/node_modules/**", "**/.git/**"],
-						});
-			for (const match of matches.sort()) {
-				const manifestPath = normalize(join(root.path, match));
-				packageAgentsCandidates.push(
-					normalize(join(dirname(manifestPath), AGENTS_FILE)),
-				);
-			}
-		}
-		const packageAgentsPaths = [...new Set(packageAgentsCandidates)].filter(
-			(path) => existsSync(path),
-		);
-		const paths = packageAgentsPaths.map((path) => ({ path, optional: false }));
+		const paths = [
+			{
+				path: join(dirname(fileURLToPath(import.meta.url)), AGENTS_FILE),
+				optional: false,
+			},
+			...packageAgentsPaths("user").map((path) => ({ path, optional: false })),
+			...(projectTrusted
+				? packageAgentsPaths("project").map((path) => ({
+						path,
+						optional: false,
+					}))
+				: []),
+		];
 		if (projectTrusted)
 			paths.push({ path: join(ctx.cwd, AGENTS_FILE), optional: true });
 		const configured = new Map<string, string>();
