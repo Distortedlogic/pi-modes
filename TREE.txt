@@ -1,9 +1,9 @@
-/tmp/pi-context-preload-tree-YAG7PR/paths.txt
+/tmp/pi-context-preload-tree-H93n7C/paths.txt
 ├── .pi
 ├── skills
 │   └── add-pi-mode
 │       └── SKILL.md
-├── AGENT_MODES.yml
+├── AGENTS.yml
 ├── .gitignore
 ├── index.ts
 ├── package.json
