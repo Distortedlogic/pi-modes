@@ -2,13 +2,46 @@ import { existsSync, globSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, join, normalize } from "node:path";
-import { CONFIG_DIR_NAME, type ExtensionAPI, type ExtensionContext } from "@earendil-works/pi-coding-agent";
+import {
+	CONFIG_DIR_NAME,
+	type ExtensionAPI,
+	type ExtensionContext,
+} from "@earendil-works/pi-coding-agent";
 import { isKeyRelease, isKeyRepeat, matchesKey } from "@earendil-works/pi-tui";
+import { Value } from "typebox/value";
 import { parse } from "yaml";
+import { type Configuration, configurationSchema } from "./agents.ts";
 
 const AGENTS_FILE = "AGENTS.yml";
+const OWNED_SECTION_PATH = "pi.extensions.pi-modes";
 const SEPARATOR = " --- ";
 const WIDGET_KEY = "pi-modes";
+
+function isObject(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function sourceError(
+	path: string,
+	kind: "parse" | "validation",
+	error: unknown,
+) {
+	const detail = error instanceof Error ? error.message : String(error);
+	const message =
+		kind === "parse"
+			? `Could not parse ${path} at ${OWNED_SECTION_PATH}: ${detail}`
+			: `Invalid configuration in ${path} at ${OWNED_SECTION_PATH}: ${detail}`;
+	return new Error(message, { cause: error });
+}
+
+function getOwnedConfiguration(document: unknown) {
+	if (!isObject(document)) return;
+	const piConfiguration = document.pi;
+	if (!isObject(piConfiguration)) return;
+	const extensions = piConfiguration.extensions;
+	if (!isObject(extensions)) return;
+	return extensions["pi-modes"];
+}
 
 async function loadModes(
 	path: string,
@@ -17,23 +50,43 @@ async function loadModes(
 	ctx: ExtensionContext,
 ): Promise<void> {
 	try {
-		const document: unknown = parse(await readFile(path, "utf8"), { mapAsMap: true });
-		if (!(document instanceof Map)) throw new Error("Expected the modes key in a map.");
-		if (!document.has("modes")) return;
-		const modeMap = document.get("modes");
-		if (!(modeMap instanceof Map)) throw new Error("Expected the modes key to map mode names to text.");
-
-		const entries: [string, string][] = [];
-		for (const [name, text] of modeMap) {
-			if (typeof name !== "string" || name.trim() === "" || typeof text !== "string") {
-				throw new Error('Each mode needs a non-empty string name and a string value. Use "" for no appended text.');
-			}
-			entries.push([name, text]);
+		let source: string;
+		try {
+			source = await readFile(path, "utf8");
+		} catch (error) {
+			if (
+				optional &&
+				error instanceof Error &&
+				"code" in error &&
+				error.code === "ENOENT"
+			)
+				return;
+			const detail = error instanceof Error ? error.message : String(error);
+			throw new Error(
+				`Cannot read ${path} at ${OWNED_SECTION_PATH}: ${detail}`,
+				{ cause: error },
+			);
 		}
-		for (const [name, text] of entries) configured.set(name, text);
+
+		let document: unknown;
+		try {
+			document = parse(source);
+		} catch (error) {
+			throw sourceError(path, "parse", error);
+		}
+		const value = getOwnedConfiguration(document);
+		if (value === undefined) return;
+
+		let configuration: Configuration;
+		try {
+			configuration = Value.Parse(configurationSchema, value);
+		} catch (error) {
+			throw sourceError(path, "validation", error);
+		}
+		for (const [name, text] of Object.entries(configuration))
+			configured.set(name, text);
 	} catch (error) {
-		if (optional && error instanceof Error && "code" in error && error.code === "ENOENT") return;
-		const message = `Cannot load modes from ${path} modes key: ${error instanceof Error ? error.message : String(error)}`;
+		const message = error instanceof Error ? error.message : String(error);
 		if (ctx.hasUI) ctx.ui.notify(message, "error");
 		else console.error(message);
 	}
@@ -63,19 +116,27 @@ export default function (pi: ExtensionAPI) {
 		removeTerminalInputListener?.();
 		removeTerminalInputListener = undefined;
 
-		const agentDir = process.env.PI_CODING_AGENT_DIR ?? join(homedir(), CONFIG_DIR_NAME, "agent");
+		const agentDir =
+			process.env.PI_CODING_AGENT_DIR ??
+			join(homedir(), CONFIG_DIR_NAME, "agent");
 		const globalPackageRoots = [
 			{ path: join(agentDir, "npm", "node_modules"), type: "npm" },
 			{ path: join(agentDir, "git"), type: "git" },
 			{ path: join(agentDir, "extensions"), type: "extensions" },
 		];
+		const projectTrusted = ctx.isProjectTrusted();
 		const projectPackageDir = join(ctx.cwd, CONFIG_DIR_NAME);
-		const projectPackageRoots = [
-			{ path: join(projectPackageDir, "npm", "node_modules"), type: "npm" },
-			{ path: join(projectPackageDir, "git"), type: "git" },
-			{ path: join(projectPackageDir, "extensions"), type: "extensions" },
-		];
-		const packageScanRoots = [...globalPackageRoots, ...projectPackageRoots].filter(({ path }) => existsSync(path));
+		const projectPackageRoots = projectTrusted
+			? [
+					{ path: join(projectPackageDir, "npm", "node_modules"), type: "npm" },
+					{ path: join(projectPackageDir, "git"), type: "git" },
+					{ path: join(projectPackageDir, "extensions"), type: "extensions" },
+				]
+			: [];
+		const packageScanRoots = [
+			...globalPackageRoots,
+			...projectPackageRoots,
+		].filter(({ path }) => existsSync(path));
 		const packageAgentsCandidates: string[] = [];
 		for (const root of packageScanRoots) {
 			const matches =
@@ -90,12 +151,17 @@ export default function (pi: ExtensionAPI) {
 						});
 			for (const match of matches.sort()) {
 				const manifestPath = normalize(join(root.path, match));
-				packageAgentsCandidates.push(normalize(join(dirname(manifestPath), AGENTS_FILE)));
+				packageAgentsCandidates.push(
+					normalize(join(dirname(manifestPath), AGENTS_FILE)),
+				);
 			}
 		}
-		const packageAgentsPaths = [...new Set(packageAgentsCandidates)].filter((path) => existsSync(path));
+		const packageAgentsPaths = [...new Set(packageAgentsCandidates)].filter(
+			(path) => existsSync(path),
+		);
 		const paths = packageAgentsPaths.map((path) => ({ path, optional: false }));
-		if (ctx.isProjectTrusted()) paths.push({ path: join(ctx.cwd, AGENTS_FILE), optional: true });
+		if (projectTrusted)
+			paths.push({ path: join(ctx.cwd, AGENTS_FILE), optional: true });
 		const configured = new Map<string, string>();
 
 		for (const { path, optional } of paths) {
