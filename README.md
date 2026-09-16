@@ -1,6 +1,6 @@
 # pi-modes
 
-`pi-modes` is a Pi extension that loads named prompt modes from Pi packages and from an optional project YAML file. In TUI mode, press `Shift+Tab` to select the next mode. When you submit input, the extension appends ` --- <mode text>` once.
+`pi-modes` is a Pi extension that loads named prompt modes from package-root and trusted project `AGENTS.yml` files. In TUI mode, press `Shift+Tab` to select the next mode. When you submit input, the extension appends ` --- <mode text>` once.
 
 ## Install
 
@@ -18,36 +18,26 @@ pi install ./pi-modes
 
 ## Configure modes
 
-A mode file must contain a YAML map. Each mode name must be a non-empty string. Each value must be a string. An empty string is valid and adds no text.
+Put modes in the `modes` map of `AGENTS.yml`. Each mode name must be a non-empty string. Each value must be a string. An empty string is valid and adds no text.
 
 ```yaml
-exec: ""
-brief: "Give a brief answer."
-review: "Review the code and report defects."
+modes:
+  exec: ""
+  brief: "Give a brief answer."
+  review: "Review the code and report defects."
 ```
 
 If no valid mode is available, the extension uses `exec` with an empty value. If configured modes exist without `exec`, the extension does not add `exec`.
 
 ### Package modes
 
-A package can declare one or more mode files in `package.json` under `pi.modes`:
-
-```json
-{
-  "pi": {
-    "extensions": ["./index.ts"],
-    "modes": ["./AGENT_MODES.yml", "./modes/review.yaml"]
-  }
-}
-```
-
-Each entry must be an exact relative path from the directory that contains `package.json`. The path must end in `.yml` or `.yaml`. Do not use a glob, directory, `!`, `+`, or `-` as a filter marker. Each declared file is required.
+A package provides modes in the `modes` map of the `AGENTS.yml` file next to its `package.json`. Other top-level keys are ignored by `pi-modes`.
 
 ### Project modes
 
-You can also put project modes in `<cwd>/.pi/AGENT_MODES.yml`.
+Put project modes in the `modes` map of `<cwd>/AGENTS.yml`.
 
-The project file is optional. The extension loads it only when Pi trusts the project.
+The project file and its `modes` key are optional. The extension reads the file only when Pi trusts the project.
 
 ## Select a mode from an extension
 
@@ -74,26 +64,25 @@ It then scans these project locations:
 - `<cwd>/.pi/npm/node_modules`
 - `<cwd>/.pi/git`
 - `<cwd>/.pi/extensions`
-- `<cwd>/package.json`
 
 The npm scans include direct unscoped and scoped packages. The Git and extension scans are recursive, but they exclude `node_modules` and `.git` directories.
 
-Package discovery does not use Pi project trust or Pi package filters. It does not read Pi settings to select packages. This rule also applies to the project package locations. The separate project mode file still requires project trust.
+Package discovery uses `package.json` files only to identify package roots. It reads each sibling `AGENTS.yml` file when present. Package discovery does not use Pi project trust or Pi package filters. It does not read Pi settings to select packages. The separate `<cwd>/AGENTS.yml` project source requires project trust.
 
 ## Source priority
 
 The extension loads mode sources in this order:
 
-1. Package mode files from global scan locations.
-2. Package mode files from project scan locations, including `<cwd>/package.json`.
-3. `<cwd>/.pi/AGENT_MODES.yml`, when Pi trusts the project.
+1. Package-root `AGENTS.yml` files from global scan locations.
+2. Package-root `AGENTS.yml` files from project scan locations.
+3. `<cwd>/AGENTS.yml`, when Pi trusts the project.
 
 A later value replaces an earlier value with the same mode name. The mode stays in one cycle position.
 
 ## Errors and reloads
 
-The extension ignores malformed package manifests and packages without `pi.modes`. An invalid `pi.modes` declaration reports one error, and processing continues with later packages.
+The extension ignores package roots without `AGENTS.yml` and `AGENTS.yml` files without a `modes` key.
 
-A missing declared mode file, malformed YAML, or invalid mode entry reports an error. The extension continues with later files. It validates a complete YAML file before it adds any mode from that file. A missing optional project mode file does not report an error.
+Malformed YAML or an invalid `modes` map reports an error. The extension continues with later files. It validates a complete `modes` map before it adds any mode from that source. A missing optional project `AGENTS.yml` file does not report an error.
 
-Run `/reload` after you change a package manifest or mode file.
+Run `/reload` after you change an `AGENTS.yml` file.
