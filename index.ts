@@ -20,25 +20,11 @@ const OWNED_SECTION_PATH = "pi-modes";
 const SEPARATOR = " --- ";
 const WIDGET_KEY = "pi-modes";
 
-function sourceError(
-	path: string,
-	kind: "parse" | "validation",
-	error: unknown,
-) {
-	const detail = error instanceof Error ? error.message : String(error);
-	const message =
-		kind === "parse"
-			? `Could not parse ${path} at ${OWNED_SECTION_PATH}: ${detail}`
-			: `Invalid configuration in ${path} at ${OWNED_SECTION_PATH}: ${detail}`;
-	return new Error(message, { cause: error });
-}
-
-async function loadModes(path: string, optional: boolean): Promise<Configuration | undefined> {
+async function loadModes(path: string): Promise<Configuration | undefined> {
 	let source: string;
 	try {
 		source = await readFile(path, "utf8");
 	} catch (error) {
-		if (optional && error instanceof Error && "code" in error && error.code === "ENOENT") return;
 		const detail = error instanceof Error ? error.message : String(error);
 		throw new Error(`Cannot read ${path} at ${OWNED_SECTION_PATH}: ${detail}`, { cause: error });
 	}
@@ -47,7 +33,8 @@ async function loadModes(path: string, optional: boolean): Promise<Configuration
 	try {
 		document = parse(source);
 	} catch (error) {
-		throw sourceError(path, "parse", error);
+		const detail = error instanceof Error ? error.message : String(error);
+		throw new Error(`Could not parse ${path} at ${OWNED_SECTION_PATH}: ${detail}`, { cause: error });
 	}
 	const value =
 		typeof document === "object" && document !== null && !Array.isArray(document)
@@ -58,7 +45,8 @@ async function loadModes(path: string, optional: boolean): Promise<Configuration
 	try {
 		return Value.Parse(configurationSchema, value);
 	} catch (error) {
-		throw sourceError(path, "validation", error);
+		const detail = error instanceof Error ? error.message : String(error);
+		throw new Error(`Invalid configuration in ${path} at ${OWNED_SECTION_PATH}: ${detail}`, { cause: error });
 	}
 }
 
@@ -106,32 +94,18 @@ export default function (pi: ExtensionAPI) {
 				});
 		const projectTrusted = ctx.isProjectTrusted();
 		const paths = [
-			{
-				path: join(dirname(fileURLToPath(import.meta.url)), AGENTS_FILE),
-				optional: false,
-			},
-			...packageAgentsPaths("user").map((path) => ({ path, optional: false })),
-			...(projectTrusted
-				? packageAgentsPaths("project").map((path) => ({
-						path,
-						optional: false,
-					}))
-				: []),
+			join(dirname(fileURLToPath(import.meta.url)), AGENTS_FILE),
+			...packageAgentsPaths("user"),
+			...(projectTrusted ? packageAgentsPaths("project") : []),
 		];
-		if (projectTrusted)
-			paths.push({ path: join(ctx.cwd, AGENTS_FILE), optional: true });
+		const projectAgentsPath = join(ctx.cwd, AGENTS_FILE);
+		if (projectTrusted && existsSync(projectAgentsPath)) paths.push(projectAgentsPath);
 		const configured = new Map<string, string>();
 
-		for (const { path, optional } of paths) {
-			try {
-				const configuration = await loadModes(path, optional);
-				if (!configuration) continue;
-				for (const [name, text] of Object.entries(configuration)) configured.set(name, text);
-			} catch (error) {
-				const message = error instanceof Error ? error.message : String(error);
-				if (ctx.hasUI) ctx.ui.notify(message, "error");
-				else console.error(message);
-			}
+		for (const path of paths) {
+			const configuration = await loadModes(path);
+			if (!configuration) continue;
+			for (const [name, text] of Object.entries(configuration)) configured.set(name, text);
 		}
 
 		modes = configured.size > 0 ? [...configured] : [["exec", ""]];
