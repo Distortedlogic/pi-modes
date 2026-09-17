@@ -10,5 +10,5 @@
 		"target": "ES2024",
 		"types": ["node"]
 	},
-	"include": [".forgejo/**/*.ts", "agents.ts", "index.ts"]
+	"include": [".forgejo/**/*.ts", "agents.ts", "index.ts", "test/**/*.ts"]
 }
