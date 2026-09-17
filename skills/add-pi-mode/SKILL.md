@@ -8,7 +8,7 @@ description: Use when the user asks to add a mode to the pi-modes extension glob
 All scopes use one combined root `AGENTS.yml`. Edit only the top-level `pi-modes` section and preserve unrelated top-level keys and other extension-owned sections:
 
 ```yaml
-pi-context-preload:
+pi-preload:
   files:
     - "src/**/*.ts"
 pi-modes:
