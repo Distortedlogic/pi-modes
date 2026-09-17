@@ -1,3 +1,9 @@
+pi-context-preload:
+  extends:
+    - "pi-extension"
+  files:
+    - "index.ts"
+    - "package.json"
 pi-modes:
   none: ""
   just-answer: "no tool calls, just answer"
