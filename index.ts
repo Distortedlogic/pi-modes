@@ -20,6 +20,8 @@ const OWNED_SECTION_PATH = "pi-modes";
 const SEPARATOR = " --- ";
 const WIDGET_KEY = "pi-modes";
 
+const modeSuffix = (text: string): string => (text === "" ? "" : `${SEPARATOR}${text}`);
+
 async function loadModes(path: string): Promise<Configuration | undefined> {
 	let source: string;
 	try {
@@ -62,12 +64,31 @@ export default function (pi: ExtensionAPI) {
 		ctx.ui.setWidget(WIDGET_KEY, content, { placement: "belowEditor" });
 	};
 
+	const changeMode = (nextModeIndex: number, ctx: ExtensionContext): void => {
+		if (nextModeIndex === modeIndex) return;
+
+		const previousSuffix = modeSuffix(modes[modeIndex][1]);
+		const nextSuffix = modeSuffix(modes[nextModeIndex][1]);
+
+		if (ctx.mode === "tui") {
+			const input = ctx.ui.getEditorText();
+			const nextInput =
+				previousSuffix !== "" && input.includes(previousSuffix)
+					? input.replace(previousSuffix, nextSuffix)
+					: `${input}${nextSuffix}`;
+
+			if (nextInput !== input) ctx.ui.setEditorText(nextInput);
+		}
+
+		modeIndex = nextModeIndex;
+		showMode(ctx);
+	};
+
 	pi.events.on("pi-modes:set", (event) => {
 		if (typeof event !== "object" || event === null || !("name" in event) || typeof event.name !== "string") return;
 		const nextModeIndex = modes.findIndex(([name]) => name === event.name);
 		if (nextModeIndex === -1 || !activeContext) return;
-		modeIndex = nextModeIndex;
-		showMode(activeContext);
+		changeMode(nextModeIndex, activeContext);
 	});
 
 	pi.on("session_start", async (_event, ctx) => {
@@ -117,8 +138,7 @@ export default function (pi: ExtensionAPI) {
 			if (!matchesKey(data, "shift+tab")) return undefined;
 			if (isKeyRepeat(data) || isKeyRelease(data)) return { consume: true };
 
-			modeIndex = (modeIndex + 1) % modes.length;
-			showMode(ctx);
+			changeMode((modeIndex + 1) % modes.length, ctx);
 			return { consume: true };
 		});
 	});
@@ -131,8 +151,7 @@ export default function (pi: ExtensionAPI) {
 	});
 
 	pi.on("input", (event) => {
-		const [, text] = modes[modeIndex];
-		const suffix = text === "" ? "" : `${SEPARATOR}${text}`;
+		const suffix = modeSuffix(modes[modeIndex][1]);
 		if (!suffix || event.text.endsWith(suffix)) {
 			return { action: "continue" };
 		}
