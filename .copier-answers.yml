@@ -1,0 +1,5 @@
+_commit: d1c984c
+_src_path: /home/entropybender/pi-extensions
+project_description: A Pi extension that loads and cycles package and project modes
+    from YAML.
+project_name: pi-modes

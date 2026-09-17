@@ -1,38 +1,53 @@
 {
-  "name": "pi-modes",
-  "version": "0.3.0",
-  "private": true,
-  "description": "A Pi extension that loads and cycles package and project modes from YAML.",
-  "type": "module",
-  "keywords": [
-    "pi-package"
-  ],
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Distortedlogic/pi-modes.git"
-  },
-  "pi": {
-    "extensions": [
-      "./index.ts"
-    ],
-    "skills": [
-      "./skills"
-    ]
-  },
-  "files": [
-    "agents.ts",
-    "index.ts",
-    "AGENTS.yml",
-    "README.md",
-    "skills"
-  ],
-  "peerDependencies": {
-    "@earendil-works/pi-coding-agent": ">=0.85.1 <1",
-    "@earendil-works/pi-tui": ">=0.85.1 <1",
-    "typebox": "*"
-  },
-  "dependencies": {
-    "yaml": "2.9.0"
-  }
+	"name": "pi-modes",
+	"version": "0.3.0",
+	"private": true,
+	"description": "A Pi extension that loads and cycles package and project modes from YAML.",
+	"type": "module",
+	"keywords": [
+		"pi-package"
+	],
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Distortedlogic/pi-modes.git"
+	},
+	"engines": {
+		"node": ">=22.19.0"
+	},
+	"scripts": {
+		"check": "npm run typecheck && npm run lint",
+		"lint": "biome check .",
+		"typecheck": "tsc --noEmit"
+	},
+	"pi": {
+		"extensions": [
+			"./index.ts"
+		],
+		"skills": [
+			"./skills"
+		]
+	},
+	"files": [
+		"agents.ts",
+		"index.ts",
+		"AGENTS.yml",
+		"README.md",
+		"skills"
+	],
+	"peerDependencies": {
+		"@earendil-works/pi-coding-agent": ">=0.85.1 <1",
+		"@earendil-works/pi-tui": ">=0.85.1 <1",
+		"typebox": "*"
+	},
+	"dependencies": {
+		"yaml": "2.9.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.5.14",
+		"@earendil-works/pi-ai": "^0.85.1",
+		"@types/node": "^26.5.1",
+		"minimatch": "^10.2.6",
+		"typescript": "^7.0.2"
+	}
 }

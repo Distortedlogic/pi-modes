@@ -62,7 +62,8 @@ export default function (pi: ExtensionAPI) {
 		ctx.ui.setWidget(WIDGET_KEY, content, { placement: "belowEditor" });
 	};
 
-	pi.events.on("pi-modes:set", (event: { name: string }) => {
+	pi.events.on("pi-modes:set", (event) => {
+		if (typeof event !== "object" || event === null || !("name" in event) || typeof event.name !== "string") return;
 		const nextModeIndex = modes.findIndex(([name]) => name === event.name);
 		if (nextModeIndex === -1 || !activeContext) return;
 		modeIndex = nextModeIndex;
@@ -74,9 +75,7 @@ export default function (pi: ExtensionAPI) {
 		removeTerminalInputListener?.();
 		removeTerminalInputListener = undefined;
 
-		const agentDir =
-			process.env.PI_CODING_AGENT_DIR ??
-			join(homedir(), CONFIG_DIR_NAME, "agent");
+		const agentDir = process.env.PI_CODING_AGENT_DIR ?? join(homedir(), CONFIG_DIR_NAME, "agent");
 		const settingsManager = SettingsManager.create(ctx.cwd, agentDir);
 		const packageManager = new DefaultPackageManager({
 			cwd: ctx.cwd,
