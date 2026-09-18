@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
@@ -19,6 +19,8 @@ import extension, {
 
 const execFileAsync = promisify(execFile);
 const projectDirectory = fileURLToPath(new URL("..", import.meta.url));
+const codingAgentEntry = fileURLToPath(import.meta.resolve("@earendil-works/pi-coding-agent"));
+const cliPath = join(dirname(codingAgentEntry), "cli.js");
 
 async function writeModes(path: string, modes: Record<string, unknown>): Promise<void> {
 	await writeFile(path, JSON.stringify({ "pi-modes": modes, "other-extension": { enabled: true } }));
@@ -102,11 +104,16 @@ test("replaces modes and cleans up runtime UI state", async (t) => {
 	});
 
 	type Handler = (event: unknown, ctx: ExtensionContext) => unknown;
+	type ShortcutHandler = (ctx: ExtensionContext) => Promise<void> | void;
 	const handlers = new Map<string, Handler>();
+	let cycleMode: ShortcutHandler | undefined;
 	let setMode: ((event: unknown) => void) | undefined;
 	const api = {
 		on(name: string, handler: Handler) {
 			handlers.set(name, handler);
+		},
+		registerShortcut(_shortcut: string, options: { handler: ShortcutHandler }) {
+			cycleMode = options.handler;
 		},
 		events: {
 			on(name: string, handler: (event: unknown) => void) {
@@ -140,11 +147,12 @@ test("replaces modes and cleans up runtime UI state", async (t) => {
 	} as unknown as ExtensionContext;
 
 	await handlers.get("session_start")?.({ reason: "startup" }, context);
-	setMode?.({ name: "test-review" });
+	assert.equal(typeof cycleMode, "function");
+	await cycleMode?.(context);
 	assert.equal(editorText, `draft${modeSuffix("Review changes")}`);
 	assert.deepEqual(widget, ["test-review"]);
 
-	setMode?.({ name: "test-plan" });
+	await cycleMode?.(context);
 	assert.equal(editorText, `draft${modeSuffix("Plan changes")}`);
 	assert.deepEqual(widget, ["test-plan"]);
 	assert.deepEqual(handlers.get("input")?.({ text: "question", images: [] }, context), {
@@ -172,16 +180,27 @@ test("replaces modes and cleans up runtime UI state", async (t) => {
 	assert.ok(listenerRemovals > 0);
 });
 
-test("loads the production extension in Pi", async () => {
+test("loads the production extension in Pi", async (t) => {
+	const agentDirectory = await mkdtemp(join(tmpdir(), "pi-modes-e2e-"));
+	t.after(() => rm(agentDirectory, { recursive: true, force: true }));
+
 	const { stderr } = await execFileAsync(
-		"pi",
-		["--no-extensions", "--extension", resolve(projectDirectory, "src/index.ts"), "--list-models"],
+		process.execPath,
+		[
+			cliPath,
+			"--no-session",
+			"--no-extensions",
+			"--extension",
+			resolve(projectDirectory, "src/index.ts"),
+			"--list-models",
+		],
 		{
 			cwd: projectDirectory,
 			encoding: "utf8",
 			env: {
 				HOME: process.env.HOME,
 				PATH: process.env.PATH,
+				PI_CODING_AGENT_DIR: agentDirectory,
 				PI_OFFLINE: "1",
 				USERPROFILE: process.env.USERPROFILE,
 			},
