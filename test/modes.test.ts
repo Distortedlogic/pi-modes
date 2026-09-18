@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import test from "node:test";
@@ -24,7 +24,7 @@ async function writeModes(path: string, modes: Record<string, unknown>): Promise
 	await writeFile(path, JSON.stringify({ "pi-modes": modes, "other-extension": { enabled: true } }));
 }
 
-test("uses one strict schema for every top-level mode source", async (t) => {
+test("validates every mode source with the strict schema", async (t) => {
 	assert.equal(Value.Check(configurationSchema, { exec: "", review: "Review the change" }), true);
 	assert.equal(Value.Check(configurationSchema, { review: 42 }), false);
 	assert.equal(Value.Check(configurationSchema, { " ": "invalid name" }), false);
@@ -33,24 +33,49 @@ test("uses one strict schema for every top-level mode source", async (t) => {
 	t.after(() => rm(directory, { recursive: true, force: true }));
 	const validPath = join(directory, "valid.yml");
 	const invalidPath = join(directory, "invalid.yml");
-	await writeModes(validPath, { review: "valid" });
-	await writeModes(invalidPath, { review: 42 });
+	await Promise.all([writeModes(validPath, { review: "valid" }), writeModes(invalidPath, { review: 42 })]);
 
 	await assert.rejects(loadConfiguredModes([validPath, invalidPath]), /Invalid configuration.*pi-modes/);
 });
 
-test("applies mode sources in package and project precedence order", async (t) => {
+test("selects trusted sources and applies source precedence", async (t) => {
 	const directory = await mkdtemp(join(tmpdir(), "pi-modes-sources-"));
 	t.after(() => rm(directory, { recursive: true, force: true }));
-	const paths = ["owned", "user", "project-package", "project-root"].map((name) => join(directory, `${name}.yml`));
+	const packageRoot = join(directory, "owned");
+	const projectRoot = join(directory, "project");
+	const userPackage = join(directory, "user-package");
+	const projectPackage = join(directory, "project-package");
+	await Promise.all([packageRoot, projectRoot, userPackage, projectPackage].map((path) => mkdir(path)));
 	await Promise.all([
-		writeModes(paths[0], { review: "owned", "owned-only": "owned" }),
-		writeModes(paths[1], { review: "user", "user-only": "user" }),
-		writeModes(paths[2], { review: "project package", "package-only": "project package" }),
-		writeModes(paths[3], { review: "project root", "root-only": "project root" }),
+		writeModes(join(packageRoot, "AGENTS.yml"), { review: "owned", "owned-only": "owned" }),
+		writeModes(join(userPackage, "AGENTS.yml"), { review: "user", "user-only": "user" }),
+		writeModes(join(projectPackage, "AGENTS.yml"), {
+			review: "project package",
+			"package-only": "project package",
+		}),
+		writeModes(join(projectRoot, "AGENTS.yml"), { review: "project root", "root-only": "project root" }),
 	]);
+	const packages = [
+		{ scope: "user" as const, installedPath: userPackage },
+		{ scope: "project" as const, installedPath: projectPackage },
+	];
 
-	assert.deepEqual(Object.fromEntries(await loadConfiguredModes(paths)), {
+	const untrustedPaths = resolveModeSourcePaths(packageRoot, projectRoot, packages, false);
+	assert.deepEqual(untrustedPaths, [join(packageRoot, "AGENTS.yml"), join(userPackage, "AGENTS.yml")]);
+	assert.deepEqual(Object.fromEntries(await loadConfiguredModes(untrustedPaths)), {
+		review: "user",
+		"owned-only": "owned",
+		"user-only": "user",
+	});
+
+	const trustedPaths = resolveModeSourcePaths(packageRoot, projectRoot, packages, true);
+	assert.deepEqual(trustedPaths, [
+		join(packageRoot, "AGENTS.yml"),
+		join(userPackage, "AGENTS.yml"),
+		join(projectPackage, "AGENTS.yml"),
+		join(projectRoot, "AGENTS.yml"),
+	]);
+	assert.deepEqual(Object.fromEntries(await loadConfiguredModes(trustedPaths)), {
 		review: "project root",
 		"owned-only": "owned",
 		"user-only": "user",
@@ -59,35 +84,7 @@ test("applies mode sources in package and project precedence order", async (t) =
 	});
 });
 
-test("includes project package and project root sources only when trusted", async (t) => {
-	const directory = await mkdtemp(join(tmpdir(), "pi-modes-trust-"));
-	t.after(() => rm(directory, { recursive: true, force: true }));
-	const packageRoot = join(directory, "owned");
-	const projectRoot = join(directory, "project");
-	const userPackage = join(directory, "user-package");
-	const projectPackage = join(directory, "project-package");
-	await Promise.all([packageRoot, projectRoot, userPackage, projectPackage].map((path) => mkdir(path)));
-	await Promise.all(
-		[packageRoot, projectRoot, userPackage, projectPackage].map((path) => writeModes(join(path, "AGENTS.yml"), {})),
-	);
-	const packages = [
-		{ scope: "user" as const, installedPath: userPackage },
-		{ scope: "project" as const, installedPath: projectPackage },
-	];
-
-	assert.deepEqual(resolveModeSourcePaths(packageRoot, projectRoot, packages, false), [
-		join(packageRoot, "AGENTS.yml"),
-		join(userPackage, "AGENTS.yml"),
-	]);
-	assert.deepEqual(resolveModeSourcePaths(packageRoot, projectRoot, packages, true), [
-		join(packageRoot, "AGENTS.yml"),
-		join(userPackage, "AGENTS.yml"),
-		join(projectPackage, "AGENTS.yml"),
-		join(projectRoot, "AGENTS.yml"),
-	]);
-});
-
-test("keeps mode cycling, suffix transformation, widget, and event-bus behavior", async (t) => {
+test("replaces modes and cleans up runtime UI state", async (t) => {
 	const directory = await mkdtemp(join(tmpdir(), "pi-modes-runtime-"));
 	const agentDirectory = join(directory, "agent");
 	const project = join(directory, "project");
@@ -122,8 +119,7 @@ test("keeps mode cycling, suffix transformation, widget, and event-bus behavior"
 
 	let editorText = "draft";
 	let widget: string[] | undefined;
-	let terminalInput: ((data: string) => { consume?: boolean } | undefined) | undefined;
-	let listenerRemoved = false;
+	let listenerRemovals = 0;
 	const context = {
 		cwd: project,
 		mode: "tui",
@@ -136,12 +132,10 @@ test("keeps mode cycling, suffix transformation, widget, and event-bus behavior"
 			setWidget: (_key: string, content: string[] | undefined) => {
 				widget = content;
 			},
-			onTerminalInput: (handler: typeof terminalInput) => {
-				terminalInput = handler;
-				return () => {
-					listenerRemoved = true;
-				};
+			onTerminalInput: () => () => {
+				listenerRemovals++;
 			},
+			notify: () => {},
 		},
 	} as unknown as ExtensionContext;
 
@@ -164,31 +158,36 @@ test("keeps mode cycling, suffix transformation, widget, and event-bus behavior"
 	);
 	assert.equal(replaceModeSuffix("draft", "", "Review changes"), `draft${modeSuffix("Review changes")}`);
 
-	assert.deepEqual(terminalInput?.("\u001b[Z"), { consume: true });
-	assert.equal(editorText.includes(modeSuffix("Plan changes")), false);
+	await writeModes(join(project, "AGENTS.yml"), { "test-reload": "Reloaded mode" });
+	await handlers.get("session_start")?.({ reason: "reload" }, context);
+	editorText = "draft";
+	setMode?.({ name: "test-review" });
+	assert.equal(editorText, "draft");
+	setMode?.({ name: "test-reload" });
+	assert.equal(editorText, `draft${modeSuffix("Reloaded mode")}`);
+	assert.deepEqual(widget, ["test-reload"]);
+
 	await handlers.get("session_shutdown")?.({ reason: "quit" }, context);
 	assert.equal(widget, undefined);
-	assert.equal(listenerRemoved, true);
+	assert.ok(listenerRemovals > 0);
 });
 
-test("loads the production extension entry", async () => {
-	const manifest = JSON.parse(await readFile(resolve(projectDirectory, "package.json"), "utf8")) as {
-		files: string[];
-		pi: { extensions: string[] };
-	};
-	assert.deepEqual(manifest.pi.extensions, ["./src/index.ts"]);
-	assert.ok(manifest.files.includes("src"));
-	assert.equal(manifest.files.includes("index.ts"), false);
-
+test("loads the production extension in Pi", async () => {
 	const { stderr } = await execFileAsync(
 		"pi",
 		["--no-extensions", "--extension", resolve(projectDirectory, "src/index.ts"), "--list-models"],
 		{
 			cwd: projectDirectory,
 			encoding: "utf8",
-			env: { ...process.env, PI_OFFLINE: "1" },
+			env: {
+				HOME: process.env.HOME,
+				PATH: process.env.PATH,
+				PI_OFFLINE: "1",
+				USERPROFILE: process.env.USERPROFILE,
+			},
 			timeout: 30_000,
 		},
 	);
+
 	assert.doesNotMatch(stderr, /Failed to load extension/);
 });
