@@ -23,7 +23,7 @@
 	},
 	"pi": {
 		"extensions": [
-			"./index.ts"
+			"./src/index.ts"
 		],
 		"skills": [
 			"./skills"
@@ -31,7 +31,7 @@
 	},
 	"files": [
 		"agents.ts",
-		"index.ts",
+		"src",
 		"AGENTS.yml",
 		"README.md",
 		"skills"
