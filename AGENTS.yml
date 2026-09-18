@@ -3,6 +3,7 @@ pi-preload:
     - "pi-extension"
   includes:
     - "index.ts"
+    - "test/**/*.ts"
     - "package.json"
 pi-modes:
   none: ""
