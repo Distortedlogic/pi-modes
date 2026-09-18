@@ -104,16 +104,11 @@ test("replaces modes and cleans up runtime UI state", async (t) => {
 	});
 
 	type Handler = (event: unknown, ctx: ExtensionContext) => unknown;
-	type ShortcutHandler = (ctx: ExtensionContext) => Promise<void> | void;
 	const handlers = new Map<string, Handler>();
-	let cycleMode: ShortcutHandler | undefined;
 	let setMode: ((event: unknown) => void) | undefined;
 	const api = {
 		on(name: string, handler: Handler) {
 			handlers.set(name, handler);
-		},
-		registerShortcut(_shortcut: string, options: { handler: ShortcutHandler }) {
-			cycleMode = options.handler;
 		},
 		events: {
 			on(name: string, handler: (event: unknown) => void) {
@@ -127,6 +122,8 @@ test("replaces modes and cleans up runtime UI state", async (t) => {
 	let editorText = "draft";
 	let widget: string[] | undefined;
 	let listenerRemovals = 0;
+	type TerminalInputHandler = (data: string) => { consume?: boolean; data?: string } | undefined;
+	let terminalInputHandler: TerminalInputHandler | undefined;
 	const context = {
 		cwd: project,
 		mode: "tui",
@@ -139,20 +136,24 @@ test("replaces modes and cleans up runtime UI state", async (t) => {
 			setWidget: (_key: string, content: string[] | undefined) => {
 				widget = content;
 			},
-			onTerminalInput: () => () => {
-				listenerRemovals++;
+			onTerminalInput: (handler: TerminalInputHandler) => {
+				terminalInputHandler = handler;
+				return () => {
+					listenerRemovals++;
+					if (terminalInputHandler === handler) terminalInputHandler = undefined;
+				};
 			},
 			notify: () => {},
 		},
 	} as unknown as ExtensionContext;
 
 	await handlers.get("session_start")?.({ reason: "startup" }, context);
-	assert.equal(typeof cycleMode, "function");
-	await cycleMode?.(context);
+	assert.equal(typeof terminalInputHandler, "function");
+	setMode?.({ name: "test-review" });
 	assert.equal(editorText, `draft${modeSuffix("Review changes")}`);
 	assert.deepEqual(widget, ["test-review"]);
 
-	await cycleMode?.(context);
+	assert.deepEqual(terminalInputHandler?.("\x1b[Z"), { consume: true });
 	assert.equal(editorText, `draft${modeSuffix("Plan changes")}`);
 	assert.deepEqual(widget, ["test-plan"]);
 	assert.deepEqual(handlers.get("input")?.({ text: "question", images: [] }, context), {
