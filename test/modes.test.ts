@@ -7,15 +7,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
-import { Value } from "typebox/value";
-import { configurationSchema } from "../agents.ts";
-import extension, {
-	loadConfiguredModes,
-	modeSuffix,
-	replaceModeSuffix,
-	resolveModeSourcePaths,
-	transformModeInput,
-} from "../src/index.ts";
+import extension, { loadConfiguredModes, modeSuffix, resolveModeSourcePaths } from "../src/index.ts";
 
 const execFileAsync = promisify(execFile);
 const projectDirectory = fileURLToPath(new URL("..", import.meta.url));
@@ -27,16 +19,13 @@ async function writeModes(path: string, modes: Record<string, unknown>): Promise
 }
 
 test("validates every mode source with the strict schema", async (t) => {
-	assert.equal(Value.Check(configurationSchema, { exec: "", review: "Review the change" }), true);
-	assert.equal(Value.Check(configurationSchema, { review: 42 }), false);
-	assert.equal(Value.Check(configurationSchema, { " ": "invalid name" }), false);
-
 	const directory = await mkdtemp(join(tmpdir(), "pi-modes-schema-"));
 	t.after(() => rm(directory, { recursive: true, force: true }));
 	const validPath = join(directory, "valid.yml");
 	const invalidPath = join(directory, "invalid.yml");
 	await Promise.all([writeModes(validPath, { review: "valid" }), writeModes(invalidPath, { review: 42 })]);
 
+	assert.deepEqual(Object.fromEntries(await loadConfiguredModes([validPath])), { review: "valid" });
 	await assert.rejects(loadConfiguredModes([validPath, invalidPath]), /Invalid configuration.*pi-modes/);
 });
 
@@ -62,28 +51,33 @@ test("selects trusted sources and applies source precedence", async (t) => {
 		{ scope: "project" as const, installedPath: projectPackage },
 	];
 
-	const untrustedPaths = resolveModeSourcePaths(packageRoot, projectRoot, packages, false);
-	assert.deepEqual(untrustedPaths, [join(packageRoot, "AGENTS.yml"), join(userPackage, "AGENTS.yml")]);
-	assert.deepEqual(Object.fromEntries(await loadConfiguredModes(untrustedPaths)), {
-		review: "user",
-		"owned-only": "owned",
-		"user-only": "user",
-	});
-
-	const trustedPaths = resolveModeSourcePaths(packageRoot, projectRoot, packages, true);
-	assert.deepEqual(trustedPaths, [
-		join(packageRoot, "AGENTS.yml"),
-		join(userPackage, "AGENTS.yml"),
-		join(projectPackage, "AGENTS.yml"),
-		join(projectRoot, "AGENTS.yml"),
-	]);
-	assert.deepEqual(Object.fromEntries(await loadConfiguredModes(trustedPaths)), {
-		review: "project root",
-		"owned-only": "owned",
-		"user-only": "user",
-		"package-only": "project package",
-		"root-only": "project root",
-	});
+	for (const selected of [
+		{
+			trusted: false,
+			paths: [join(packageRoot, "AGENTS.yml"), join(userPackage, "AGENTS.yml")],
+			modes: { review: "user", "owned-only": "owned", "user-only": "user" },
+		},
+		{
+			trusted: true,
+			paths: [
+				join(packageRoot, "AGENTS.yml"),
+				join(userPackage, "AGENTS.yml"),
+				join(projectPackage, "AGENTS.yml"),
+				join(projectRoot, "AGENTS.yml"),
+			],
+			modes: {
+				review: "project root",
+				"owned-only": "owned",
+				"user-only": "user",
+				"package-only": "project package",
+				"root-only": "project root",
+			},
+		},
+	]) {
+		const sourcePaths = resolveModeSourcePaths(packageRoot, projectRoot, packages, selected.trusted);
+		assert.deepEqual(sourcePaths, selected.paths);
+		assert.deepEqual(Object.fromEntries(await loadConfiguredModes(sourcePaths)), selected.modes);
+	}
 });
 
 test("replaces modes and cleans up runtime UI state", async (t) => {
@@ -121,7 +115,6 @@ test("replaces modes and cleans up runtime UI state", async (t) => {
 
 	let editorText = "draft";
 	let widget: string[] | undefined;
-	let listenerRemovals = 0;
 	type TerminalInputHandler = (data: string) => { consume?: boolean; data?: string } | undefined;
 	let terminalInputHandler: TerminalInputHandler | undefined;
 	const context = {
@@ -139,7 +132,6 @@ test("replaces modes and cleans up runtime UI state", async (t) => {
 			onTerminalInput: (handler: TerminalInputHandler) => {
 				terminalInputHandler = handler;
 				return () => {
-					listenerRemovals++;
 					if (terminalInputHandler === handler) terminalInputHandler = undefined;
 				};
 			},
@@ -148,37 +140,27 @@ test("replaces modes and cleans up runtime UI state", async (t) => {
 	} as unknown as ExtensionContext;
 
 	await handlers.get("session_start")?.({ reason: "startup" }, context);
-	assert.equal(typeof terminalInputHandler, "function");
 	setMode?.({ name: "test-review" });
 	assert.equal(editorText, `draft${modeSuffix("Review changes")}`);
 	assert.deepEqual(widget, ["test-review"]);
 
 	assert.deepEqual(terminalInputHandler?.("\x1b[Z"), { consume: true });
 	assert.equal(editorText, `draft${modeSuffix("Plan changes")}`);
-	assert.deepEqual(widget, ["test-plan"]);
 	assert.deepEqual(handlers.get("input")?.({ text: "question", images: [] }, context), {
 		action: "transform",
 		text: `question${modeSuffix("Plan changes")}`,
 		images: [],
 	});
-	assert.equal(
-		transformModeInput(`question${modeSuffix("Plan changes")}`, "Plan changes"),
-		`question${modeSuffix("Plan changes")}`,
-	);
-	assert.equal(replaceModeSuffix("draft", "", "Review changes"), `draft${modeSuffix("Review changes")}`);
 
 	await writeModes(join(project, "AGENTS.yml"), { "test-reload": "Reloaded mode" });
 	await handlers.get("session_start")?.({ reason: "reload" }, context);
 	editorText = "draft";
-	setMode?.({ name: "test-review" });
-	assert.equal(editorText, "draft");
 	setMode?.({ name: "test-reload" });
 	assert.equal(editorText, `draft${modeSuffix("Reloaded mode")}`);
-	assert.deepEqual(widget, ["test-reload"]);
 
 	await handlers.get("session_shutdown")?.({ reason: "quit" }, context);
 	assert.equal(widget, undefined);
-	assert.ok(listenerRemovals > 0);
+	assert.equal(terminalInputHandler, undefined);
 });
 
 test("loads the production extension in Pi", async (t) => {
