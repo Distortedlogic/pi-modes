@@ -42,13 +42,12 @@
 		"typebox": "*"
 	},
 	"dependencies": {
-		"yaml": "2.9.0"
+		"pi-agents-yaml": "github:Distortedlogic/pi-agents-yaml#main"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.14",
 		"@earendil-works/pi-ai": "^0.85.1",
 		"@types/node": "^22.19.0",
-		"minimatch": "^10.2.6",
 		"typescript": "~7.0.2"
 	}
 }

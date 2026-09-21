@@ -6,8 +6,14 @@ import { dirname, join, resolve } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
-import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
-import extension, { loadConfiguredModes, modeSuffix, resolveModeSourcePaths } from "../src/index.ts";
+import {
+	CONFIG_DIR_NAME,
+	type ExtensionAPI,
+	type ExtensionContext,
+	SettingsManager,
+} from "@earendil-works/pi-coding-agent";
+import { discoverAgentsSources } from "pi-agents-yaml";
+import extension, { loadConfiguredModes, modeSuffix } from "../src/index.ts";
 
 const execFileAsync = promisify(execFile);
 const projectDirectory = fileURLToPath(new URL("..", import.meta.url));
@@ -32,24 +38,32 @@ test("validates every mode source with the strict schema", async (t) => {
 test("selects trusted sources and applies source precedence", async (t) => {
 	const directory = await mkdtemp(join(tmpdir(), "pi-modes-sources-"));
 	t.after(() => rm(directory, { recursive: true, force: true }));
+	const agentDirectory = join(directory, "agent");
 	const packageRoot = join(directory, "owned");
 	const projectRoot = join(directory, "project");
+	const projectConfigDirectory = join(projectRoot, CONFIG_DIR_NAME);
 	const userPackage = join(directory, "user-package");
 	const projectPackage = join(directory, "project-package");
-	await Promise.all([packageRoot, projectRoot, userPackage, projectPackage].map((path) => mkdir(path)));
+	await Promise.all(
+		[agentDirectory, packageRoot, projectRoot, projectConfigDirectory, userPackage, projectPackage].map((path) =>
+			mkdir(path, { recursive: true }),
+		),
+	);
 	await Promise.all([
 		writeModes(join(packageRoot, "AGENTS.yml"), { review: "owned", "owned-only": "owned" }),
+		writeFile(join(userPackage, "package.json"), '{"name":"user-modes"}\n'),
 		writeModes(join(userPackage, "AGENTS.yml"), { review: "user", "user-only": "user" }),
+		writeFile(join(projectPackage, "package.json"), '{"name":"project-modes"}\n'),
 		writeModes(join(projectPackage, "AGENTS.yml"), {
 			review: "project package",
 			"package-only": "project package",
 		}),
 		writeModes(join(projectRoot, "AGENTS.yml"), { review: "project root", "root-only": "project root" }),
+		writeFile(join(projectConfigDirectory, "settings.json"), JSON.stringify({ packages: [projectPackage] })),
 	]);
-	const packages = [
-		{ scope: "user" as const, installedPath: userPackage },
-		{ scope: "project" as const, installedPath: projectPackage },
-	];
+	const settingsManager = SettingsManager.create(projectRoot, agentDirectory);
+	settingsManager.setPackages([userPackage]);
+	await settingsManager.flush();
 
 	for (const selected of [
 		{
@@ -74,7 +88,14 @@ test("selects trusted sources and applies source precedence", async (t) => {
 			},
 		},
 	]) {
-		const sourcePaths = resolveModeSourcePaths(packageRoot, projectRoot, packages, selected.trusted);
+		const sourcePaths = discoverAgentsSources({
+			cwd: projectRoot,
+			projectTrusted: selected.trusted,
+			packageRoot,
+			agentDirectory,
+		})
+			.filter((source) => source.hasAgentsFile)
+			.map((source) => source.sourcePath);
 		assert.deepEqual(sourcePaths, selected.paths);
 		assert.deepEqual(Object.fromEntries(await loadConfiguredModes(sourcePaths)), selected.modes);
 	}
