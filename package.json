@@ -18,7 +18,7 @@
 	"scripts": {
 		"check": "npm run typecheck && npm run lint && npm test",
 		"lint": "biome check .",
-		"test": "node --experimental-strip-types --test test/*.test.ts",
+		"test": "node --import tsx --test test/*.test.ts",
 		"typecheck": "tsc --noEmit"
 	},
 	"pi": {
@@ -48,6 +48,8 @@
 		"@biomejs/biome": "^2.5.14",
 		"@earendil-works/pi-ai": "^0.85.1",
 		"@types/node": "^22.19.0",
+		"minimatch": "10.2.6",
+		"tsx": "4.23.15",
 		"typescript": "~7.0.2"
 	}
 }
