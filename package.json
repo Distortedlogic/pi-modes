@@ -1,6 +1,6 @@
 {
 	"name": "pi-modes",
-	"version": "0.3.1",
+	"version": "0.3.2",
 	"private": true,
 	"description": "A Pi extension that loads and cycles package and project modes from YAML.",
 	"type": "module",
@@ -42,7 +42,7 @@
 		"typebox": "*"
 	},
 	"dependencies": {
-		"pi-agents-yaml": "github:Distortedlogic/pi-agents-yaml#2d23b5261e519ef5a6811401ae2cbb1250eec7cc"
+		"pi-agents-yaml": "github:Distortedlogic/pi-agents-yaml#761369f8e34b460ed20deff4d733ef3963fef892"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.5.14",
