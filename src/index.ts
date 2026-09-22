@@ -1,7 +1,5 @@
-import { homedir } from "node:os";
-import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { CONFIG_DIR_NAME, type ExtensionAPI, type ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { type ExtensionAPI, type ExtensionContext, getAgentDir } from "@earendil-works/pi-coding-agent";
 import { isKeyRelease, isKeyRepeat, matchesKey } from "@earendil-works/pi-tui";
 import { discoverAgentsSources, loadAgentsSection } from "pi-agents-yaml";
 import { configurationSchema } from "../agents.ts";
@@ -77,7 +75,7 @@ export default function (pi: ExtensionAPI) {
 			cwd: ctx.cwd,
 			projectTrusted: ctx.isProjectTrusted(),
 			packageRoot: PACKAGE_ROOT,
-			agentDirectory: process.env.PI_CODING_AGENT_DIR ?? join(homedir(), CONFIG_DIR_NAME, "agent"),
+			agentDirectory: getAgentDir(),
 		});
 		modes = await loadConfiguredModes(
 			sources.filter((source) => source.hasAgentsFile).map((source) => source.sourcePath),
