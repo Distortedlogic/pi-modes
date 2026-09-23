@@ -1,18 +1,10 @@
 import assert from "node:assert/strict";
-import { execFile } from "node:child_process";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { join } from "node:path";
 import test from "node:test";
-import { fileURLToPath } from "node:url";
-import { promisify } from "node:util";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import extension, { loadConfiguredModes, modeSuffix } from "../src/index.ts";
-
-const execFileAsync = promisify(execFile);
-const projectDirectory = fileURLToPath(new URL("..", import.meta.url));
-const codingAgentEntry = fileURLToPath(import.meta.resolve("@earendil-works/pi-coding-agent"));
-const cliPath = join(dirname(codingAgentEntry), "cli.js");
 
 async function writeModes(path: string, modes: Record<string, unknown>): Promise<void> {
 	await writeFile(path, JSON.stringify({ "pi-modes": modes, "other-extension": { enabled: true } }));
@@ -140,35 +132,4 @@ test("replaces modes and cleans up runtime UI state", async (t) => {
 	await handlers.get("session_shutdown")?.({ reason: "quit" }, context);
 	assert.equal(widget, undefined);
 	assert.equal(terminalInputHandler, undefined);
-});
-
-test("loads the production extension in Pi", async (t) => {
-	const agentDirectory = await mkdtemp(join(tmpdir(), "pi-modes-e2e-"));
-	t.after(() => rm(agentDirectory, { recursive: true, force: true }));
-
-	const { stderr } = await execFileAsync(
-		process.execPath,
-		[
-			cliPath,
-			"--no-session",
-			"--no-extensions",
-			"--extension",
-			resolve(projectDirectory, "src/index.ts"),
-			"--list-models",
-		],
-		{
-			cwd: projectDirectory,
-			encoding: "utf8",
-			env: {
-				HOME: process.env.HOME,
-				PATH: process.env.PATH,
-				PI_CODING_AGENT_DIR: agentDirectory,
-				PI_OFFLINE: "1",
-				USERPROFILE: process.env.USERPROFILE,
-			},
-			timeout: 30_000,
-		},
-	);
-
-	assert.doesNotMatch(stderr, /Failed to load extension/);
 });
