@@ -9,8 +9,8 @@ All scopes use one combined root `AGENTS.yml`. Edit only the top-level `pi-modes
 
 ```yaml
 pi-preload:
-  files:
-    - "src/**/*.ts"
+  presets:
+    - "pi-extension"
 pi-modes:
   review: "Review the changes."
 pi-prompts:
