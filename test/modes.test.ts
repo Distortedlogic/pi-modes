@@ -51,6 +51,15 @@ test("applies source precedence over an ordered list of AGENTS.yml files", async
 	});
 });
 
+test("provides the global context-building mode", async () => {
+	const modes = Object.fromEntries(await loadConfiguredModes([join(import.meta.dirname, "..", "AGENTS.yml")]));
+
+	assert.match(modes.context ?? "", /complete repository tree in the system prompt/);
+	assert.match(modes.context ?? "", /reuse complete file reads/);
+	assert.match(modes.context ?? "", /use read_signatures/);
+	assert.match(modes.context ?? "", /reserve grep-like search/);
+});
+
 test("replaces modes and cleans up runtime UI state", async (t) => {
 	const directory = await mkdtemp(join(tmpdir(), "pi-modes-runtime-"));
 	const agentDirectory = join(directory, "agent");

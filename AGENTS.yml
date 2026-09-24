@@ -8,6 +8,12 @@ pi-preload:
     - "test/**/*.ts"
 pi-modes:
   none: ""
+  context: >-
+    build context before acting. inspect the complete repository tree in the system prompt and select all files relevant
+    to this user session by concept, path, and filename. reuse complete file reads already present in the active context.
+    in one pass, use read for each relevant unread or changed file that may be edited, and use read_signatures for each
+    relevant unread or changed file needed only for its api. reserve grep-like search for cases where the tree shows no
+    good candidate file.
   just-answer: "no tool calls, just answer"
   no-lazy: >-
     stop giving me low effort responses. u have all the context needed n it should be clear what i am asking for such that if u put in the effort that u will generate a good response. --- no tool calls, just answer.
