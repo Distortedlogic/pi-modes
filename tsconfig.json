@@ -2,13 +2,15 @@
 	"compilerOptions": {
 		"allowImportingTsExtensions": true,
 		"erasableSyntaxOnly": true,
+		"isolatedModules": true,
 		"module": "NodeNext",
 		"moduleResolution": "NodeNext",
 		"noEmit": true,
 		"skipLibCheck": true,
 		"strict": true,
 		"target": "ES2024",
-		"types": ["node"]
+		"types": ["node"],
+		"verbatimModuleSyntax": true
 	},
-	"include": [".forgejo/**/*.ts", "agents.ts", "src/**/*.ts", "test/**/*.ts"]
+	"include": ["agents.ts", "src/**/*.ts", "test/**/*.ts"]
 }
