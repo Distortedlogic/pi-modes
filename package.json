@@ -36,17 +36,19 @@
 		"skills"
 	],
 	"peerDependencies": {
-		"@earendil-works/pi-coding-agent": "0.87.1",
-		"@earendil-works/pi-tui": "0.87.1",
+		"@earendil-works/pi-ai": "*",
+		"@earendil-works/pi-coding-agent": "*",
+		"@earendil-works/pi-tui": "*",
 		"typebox": "*"
 	},
 	"dependencies": {
-		"pi-agents-yaml": "github:Distortedlogic/pi-agents-yaml#f37144ad06e205ed5baad8227edf5771578cc31b"
+		"pi-agents-yaml": "github:Distortedlogic/pi-agents-yaml#6ccce9260aac52c6b201488ae79fd20cfb8fd555"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.5.14",
-		"@earendil-works/pi-coding-agent": "0.87.1",
-		"@earendil-works/pi-tui": "0.87.1",
+		"@earendil-works/pi-ai": "0.99.2",
+		"@earendil-works/pi-coding-agent": "0.99.2",
+		"@earendil-works/pi-tui": "0.99.2",
 		"@types/node": "22.20.4",
 		"tsx": "4.23.15",
 		"typebox": "1.3.34",
