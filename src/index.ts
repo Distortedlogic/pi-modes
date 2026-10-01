@@ -86,16 +86,8 @@ export default function (pi: ExtensionAPI) {
 		if (ctx.mode !== "tui") return;
 
 		removeTerminalInputListener = ctx.ui.onTerminalInput((data) => {
-			const parameterizedBackTab = data.startsWith("\x1b") ? /^\[1;2(?::([123]))?Z$/.exec(data.slice(1)) : null;
-			if (!matchesKey(data, "shift+tab") && !parameterizedBackTab) return undefined;
-			if (
-				isKeyRepeat(data) ||
-				isKeyRelease(data) ||
-				parameterizedBackTab?.[1] === "2" ||
-				parameterizedBackTab?.[1] === "3"
-			) {
-				return { consume: true };
-			}
+			if (!matchesKey(data, "shift+tab")) return undefined;
+			if (isKeyRepeat(data) || isKeyRelease(data)) return { consume: true };
 
 			changeMode((modeIndex + 1) % modes.length, ctx);
 			return { consume: true };
