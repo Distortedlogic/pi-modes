@@ -42,7 +42,7 @@
 		"typebox": "*"
 	},
 	"dependencies": {
-		"pi-agents-yaml": "github:Distortedlogic/pi-agents-yaml#6ccce9260aac52c6b201488ae79fd20cfb8fd555"
+		"pi-agents-yaml": "github:Distortedlogic/pi-agents-yaml#a43c4fe032c956132e4649ce0f7e991d700af4c6"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.5.14",
