@@ -117,6 +117,12 @@ test("replaces modes and cleans up runtime UI state", async (t) => {
 
 	assert.deepEqual(terminalInputHandler?.("\x1b[Z"), { consume: true });
 	assert.equal(editorText, `draft${modeSuffix("Plan changes")}`);
+	assert.deepEqual(terminalInputHandler?.("\x1b[1;2:2Z"), { consume: true });
+	assert.deepEqual(terminalInputHandler?.("\x1b[1;2:3Z"), { consume: true });
+	assert.equal(editorText, `draft${modeSuffix("Plan changes")}`);
+	setMode?.({ name: "test-review" });
+	assert.deepEqual(terminalInputHandler?.("\x1b[1;2Z"), { consume: true });
+	assert.equal(editorText, `draft${modeSuffix("Plan changes")}`);
 	assert.deepEqual(handlers.get("input")?.({ text: "question", images: [] }, context), {
 		action: "transform",
 		text: `question${modeSuffix("Plan changes")}`,
